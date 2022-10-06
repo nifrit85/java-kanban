@@ -1,0 +1,11 @@
+package Task;
+public class SimpleTask extends Task {
+    public SimpleTask(String name, String description) {
+        super(name, description);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()  +'}' + "\r\n";
+    }
+}
