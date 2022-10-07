@@ -1,9 +1,7 @@
 package Task;
-
 import java.util.ArrayList;
 
-public class EpicTask extends Task {
-
+public class EpicTask extends SimpleTask {
     ArrayList<Integer> subTaskIDs = new ArrayList<>();
 
     public EpicTask(String name, String description) {
@@ -22,10 +20,12 @@ public class EpicTask extends Task {
     public void delSubTask(SubTask subTask){
         if (subTask != null){
             Integer subTaskId = subTask.getId();
-            if (this.subTaskIDs.contains(subTaskId)){
-                this.subTaskIDs.remove(subTaskId);
-            }
+            this.subTaskIDs.remove(subTaskId);
         }
+    }
+
+    public void clearSubTasks(){
+        this.subTaskIDs.clear();
     }
 
     public ArrayList<Integer> getSubTaskIDs() {
@@ -34,6 +34,6 @@ public class EpicTask extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + ", Sub=" + this.subTaskIDs.toString()  +'}' + "\r\n";
+        return super.toString() + ", Sub=" + this.subTaskIDs.toString()  +'}' + System.lineSeparator();
     }
 }

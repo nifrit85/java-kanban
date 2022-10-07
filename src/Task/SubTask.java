@@ -1,6 +1,6 @@
 package Task;
 
-public class SubTask extends Task {
+public class SubTask extends SimpleTask {
     private Integer parentID;
 
     public SubTask(String name, String description) {
@@ -13,12 +13,16 @@ public class SubTask extends Task {
         }
     }
 
-    public int getParentID() {
+    public Integer getParentID() {
         return parentID;
+    }
+
+    public void clearParent(){
+        this.parentID = null;
     }
 
     @Override
     public String toString() {
-        return super.toString() + ", Parent=" + this.parentID + '}' + "\r\n";
+        return super.toString() + ", Parent=" + this.parentID + '}' + System.lineSeparator();
     }
 }
