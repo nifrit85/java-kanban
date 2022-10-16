@@ -1,17 +1,17 @@
 package Task;
 import java.util.ArrayList;
 
-public class EpicTask extends SimpleTask {
+public class EpicTask extends Task {
     ArrayList<Integer> subTaskIDs = new ArrayList<>();
 
     public EpicTask(String name, String description) {
         super(name, description);
     }
 
-    public void addSubTask(SubTask subTask){
-        if (subTask != null){
+    public void addSubTask(SubTask subTask) {
+        if (subTask != null) {
             int subTaskId = subTask.getId();
-            if (!this.subTaskIDs.contains(subTaskId)){
+            if (!this.subTaskIDs.contains(subTaskId)) {
                 this.subTaskIDs.add(subTaskId);
             }
         }

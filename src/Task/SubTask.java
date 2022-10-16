@@ -1,6 +1,6 @@
 package Task;
 
-public class SubTask extends SimpleTask {
+public class SubTask extends Task {
     private Integer parentID;
 
     public SubTask(String name, String description) {
@@ -8,7 +8,7 @@ public class SubTask extends SimpleTask {
     }
 
     public void setParent(EpicTask parent) {
-        if (parent != null){
+        if (parent != null) {
             this.parentID = parent.getId();
         }
     }
