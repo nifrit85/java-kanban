@@ -1,9 +1,11 @@
+package Manager;
 
 import Task.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 public class InMemoryTaskManager implements TaskManager {
     int Id;
@@ -100,6 +102,11 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         return subTasks;
+    }
+
+    @Override
+    public Queue<Task> getHistory(){
+        return historyManager.getHistory();
     }
 
 

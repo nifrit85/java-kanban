@@ -1,3 +1,4 @@
+import Manager.TaskManager;
 import Task.EpicTask;
 import Task.SimpleTask;
 import Task.Status;
@@ -5,8 +6,6 @@ import Task.SubTask;
 
 public class Test {
     private final TaskManager manager;
-
-    HistoryManager historyManager = Managers.getDefaultHistory();
 
     public Test(TaskManager manager) {
         this.manager = manager;
@@ -67,14 +66,14 @@ public class Test {
         manager.clearTasks();
         System.out.println("****************");
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 10; i++) {
             addSimple();
             addEpicWithSub();
         }
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 1; i <= 15; i++) {
             manager.getTaskById(i);
-            System.out.println(historyManager.getHistory());
+            System.out.println(manager.getHistory());
             System.out.println("***");
         }
         System.out.println("****************");

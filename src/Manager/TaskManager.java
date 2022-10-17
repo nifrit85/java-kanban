@@ -1,3 +1,5 @@
+package Manager;
+
 import Task.EpicTask;
 import Task.SimpleTask;
 import Task.SubTask;
@@ -5,6 +7,7 @@ import Task.Task;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 public interface TaskManager {
 
@@ -25,4 +28,6 @@ public interface TaskManager {
     void updateTask(Task task);
 
     Map<Integer, SubTask> getSubTaskFromEpic(EpicTask parent);
+
+    Queue<Task> getHistory();
 }
