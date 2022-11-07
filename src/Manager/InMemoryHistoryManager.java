@@ -7,27 +7,64 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final CustomLinkedList<Task> historyList = new CustomLinkedList<>();
+//    private final CustomLinkedList<Task> historyList = new CustomLinkedList<>();
     private final HashMap<Integer, Node> historyLink = new HashMap<>();
 
-    public class CustomLinkedList<T> {
-        public Node<T> head;
-        public Node<T> tail;
-        private int size = 0;
+    private Node head;
+    private Node tail;
 
-        public void linkLast(T element) {
-            if (element != null) {
-                final Node<T> oldTail = tail;
-                final Node<T> newNode = new Node<>(tail, element, null);
+    static class Node {
+        public Task data;
+        public Node next;
+        public Node prev;
+
+        public Node(Node prev, Task task, Node next) {
+            this.data = task;
+            this.next = next;
+            this.prev = prev;
+        }
+
+        @Override
+        public String toString() {
+            Integer idPrev = null;
+            Integer idCurr = null;
+            Integer idNext = null;
+            Task task;
+            if (prev != null) {
+                task = prev.data;
+                idPrev = task.getId();
+            }
+            if (data != null) {
+                task = data;
+                idCurr = task.getId();
+            }
+            if (next != null) {
+                task = next.data;
+                idNext = task.getId();
+            }
+            return "Node{" +
+                    "prev=" + idPrev +
+                    ", curr=" + idCurr +
+                    ", next=" + idNext +
+                    '}';
+        }
+    }
+
+//    public class CustomLinkedList<T> {
+
+//        private int size = 0;
+
+        public void linkLast(Task task) {
+            if (task != null) {
+                final Node oldTail = tail;
+                final Node newNode = new Node(tail, task, null);
                 tail = newNode;
                 if (oldTail == null) {
                     head = newNode;
                 } else {
                     oldTail.next = newNode;
                 }
-                size++;
 
-                Task task = (Task) element;
                 historyLink.put(task.getId(), newNode);
             }
         }
@@ -38,60 +75,54 @@ public class InMemoryHistoryManager implements HistoryManager {
                 if (head == null) {
                     tail = null;
                 }
-                size--;
                 return;
             }
             if (node == tail) {
                 tail = node.prev;
                 tail.next = null;
-                size--;
                 return;
             }
             node.prev.next = node.next;
             node.next.prev = node.prev;
-            size--;
         }
 
         public List<Task> getTasks() {
             ArrayList<Task> history = new ArrayList<>();
-            Node next = historyList.head;
-            history.add(historyList.head.data);
-            while (next != historyList.tail) {
+            Node next = head;
+            history.add(head.data);
+            while (next != tail) {
                 next = next.next;
-                history.add((Task) next.data);
+                history.add(next.data);
             }
             return history;
         }
-    }
-
+//    }
 
     @Override
     public void add(Task task) {
         if (task != null) {
             remove(task.getId());
-            historyList.linkLast(task);
+            linkLast(task);
         }
     }
 
     @Override
     public void remove(int id) {
-        Node node = historyLink.get(id);
+        Node node = historyLink.remove(id);
         if (node != null) {
-            historyList.removeNode(node);
-            historyLink.remove(id, node);
+            removeNode(node);
         }
     }
 
     @Override
     public List<Task> getHistory() {
-        return historyList.getTasks();
+        return getTasks();
     }
 
     @Override
     public void clearAll() {
         historyLink.clear();
-        historyList.head = null;
-        historyList.tail = null;
-        historyList.size = 0;
+        head = null;
+        tail = null;
     }
 }

@@ -23,6 +23,13 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + ", Parent=" + this.parentID + '}' + System.lineSeparator();
+        return
+                "Sub{" +
+                "Id=" + Id +
+                ", name='" + name + "' " +
+                ", description='" + description + "' " +
+                ", status=" + status +
+                ", Parent=" + parentID + "}" +
+                System.lineSeparator();
     }
 }

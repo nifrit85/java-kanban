@@ -34,6 +34,13 @@ public class EpicTask extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + ", Sub=" + this.subTaskIDs.toString()  +'}' + System.lineSeparator();
+        return
+                "Epic{" +
+                "Id=" + Id +
+                ", name='" + name + "' " +
+                ", description='" + description + "' " +
+                ", status=" + status +
+                ", subTaskIDs=" + subTaskIDs.toString() + "}" +
+                System.lineSeparator();
     }
 }

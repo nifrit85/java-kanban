@@ -35,13 +35,5 @@ public abstract class Task {
         this.description = description;
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "Id=" + Id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", type=" + this.getClass().getName() + System.lineSeparator();
-    }
+
 }
