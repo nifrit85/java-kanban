@@ -1,8 +1,5 @@
 import Manager.TaskManager;
-import Task.EpicTask;
-import Task.SimpleTask;
-import Task.Status;
-import Task.SubTask;
+import Task.*;
 
 public class Test {
     private final TaskManager manager;
@@ -13,7 +10,7 @@ public class Test {
 
     public void run() {
         addSimple();
-        addEpicWithSub();
+        addEpicWith3Sub();
         show();
         showTask();
         manager.clearTasks();
@@ -26,14 +23,14 @@ public class Test {
         manager.clearTasks();
         System.out.println("****************");
 
-        addEpicWithSub();
+        addEpicWith3Sub();
         show();
         deleteEpicTask(1);
         show();
         manager.clearTasks();
         System.out.println("****************");
 
-        addEpicWithSub();
+        addEpicWith3Sub();
         show();
         deleteSubTask(2);
         show();
@@ -44,7 +41,7 @@ public class Test {
         manager.clearTasks();
         System.out.println("****************");
 
-        addEpicWithSub();
+        addEpicWith3Sub();
         show();
         setSubStatus(2, Status.IN_PROGRESS);
         show();
@@ -68,7 +65,7 @@ public class Test {
 
         for (int i = 1; i <= 10; i++) {
             addSimple();
-            addEpicWithSub();
+            addEpicWith3Sub();
         }
 
         for (int i = 1; i <= 15; i++) {
@@ -86,7 +83,7 @@ public class Test {
         manager.addTask(task, null);
     }
 
-    private void addEpicWithSub() {
+    private void addEpicWith3Sub() {
 
         String name = "Name";
         String descr = "Descr";
@@ -138,6 +135,54 @@ public class Test {
         System.out.println("Сабы эпика " + id);
         EpicTask epic = (EpicTask) manager.getTaskById(id);
         System.out.println(manager.getSubTaskFromEpic(epic));
+    }
+
+    public void runSecondTest() {
+        addSimple();
+        addSimple();
+        addEpicWith3Sub();
+        addEpic();
+        for (int i = 1; i < 8; i++) {
+            System.out.println("get " + i);
+            Task task = manager.getTaskById(i);
+            System.out.println(manager.getHistory());
+        }
+        for (int i = 1; i < 9; i +=2) {
+            System.out.println("get " + i);
+            Task task = manager.getTaskById(i);
+            System.out.println(manager.getHistory());
+        }
+        int id;
+        id = 1;
+        System.out.println("remove simple " + id);
+        manager.deleteTaskByID(id);
+        System.out.println(manager.getHistory());
+        id = 3;
+        System.out.println("remove Epic " + id +" and sub 4,5,6");
+        manager.deleteTaskByID(id);
+        System.out.println(manager.getHistory());
+        id = 7;
+        System.out.println("remove Epic " + id);
+        manager.deleteTaskByID(id);
+        System.out.println(manager.getHistory());
+        id = 7;
+        System.out.println("remove Epic " + id);
+        manager.deleteTaskByID(id);
+        System.out.println(manager.getHistory());
+
+        System.out.println("clear all");
+        manager.clearTasks();
+        addSimple();
+        System.out.println("get 1" );
+        Task task = manager.getTaskById(1);
+        System.out.println(manager.getHistory());
+    }
+
+    private void addEpic() {
+        String name = "Name";
+        String descr = "Descr";
+        EpicTask taskEpic = new EpicTask(name, descr);
+        manager.addTask(taskEpic, null);
     }
 }
 

@@ -4,8 +4,8 @@ import Task.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 public class InMemoryTaskManager implements TaskManager {
     int Id;
@@ -42,6 +42,7 @@ public class InMemoryTaskManager implements TaskManager {
         clearSimpleTasks();
         clearSubTasks();
         clearEpicTasks();
+        historyManager.clearAll();
     }
 
     public int getNewID(int id) {
@@ -54,6 +55,7 @@ public class InMemoryTaskManager implements TaskManager {
         deleteSimpleTaskByID(Id);
         deleteSubTaskByID(Id);
         deleteEpicTaskByID(Id);
+        historyManager.remove(Id);
     }
 
     @Override
@@ -105,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Queue<Task> getHistory(){
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 
@@ -167,6 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
             for (Map.Entry<Integer, SubTask> subTask : subTasks.entrySet()) {
                 subTask.getValue().clearParent();
                 this.subTasks.remove(subTask.getValue().getId());
+                historyManager.remove(subTask.getValue().getId());
             }
         }
         this.epicTasks.remove(Id);
@@ -180,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.subTasks.put(subTask.getId(), subTask);
 
         int parentID = subTask.getParentID();
-        EpicTask parent = (EpicTask) getTaskById(parentID);
+        EpicTask parent = (EpicTask) getTaskByIdInternalUse(parentID);
         if (parent != null) updateEpicTask(parent);
     }
 
@@ -228,6 +231,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     private SubTask getSubTaskById(int Id) {
         return this.subTasks.getOrDefault(Id, null);
+    }
+
+    private Task getTaskByIdInternalUse(int Id) {
+        Task task = getSimpleTaskById(Id);
+        if (task != null) {
+            return task;
+        }
+        task = getEpicTaskById(Id);
+        if (task != null) {
+            return task;
+        }
+        task = getSubTaskById(Id);
+        return task;
     }
 
 }

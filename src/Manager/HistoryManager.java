@@ -1,12 +1,16 @@
 package Manager;
 
 import Task.Task;
-import java.util.Queue;
 
+import java.util.List;
 
 public interface HistoryManager {
 
     void add(Task task);
 
-    Queue<Task> getHistory();
+    void remove(int id);
+
+    List<Task> getHistory();
+
+    void clearAll();
 }
