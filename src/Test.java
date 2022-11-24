@@ -1,6 +1,8 @@
 import Manager.TaskManager;
 import Task.*;
 
+import java.util.Random;
+
 public class Test {
     private final TaskManager manager;
 
@@ -183,6 +185,20 @@ public class Test {
         String descr = "Descr";
         EpicTask taskEpic = new EpicTask(name, descr);
         manager.addTask(taskEpic, null);
+    }
+
+    public void runThirdTest() {
+        System.out.println(manager.getTasks());
+        addSimple();
+        addEpicWith3Sub();
+        addSimple();
+        addEpicWith3Sub();
+
+        for (int i = 0; i < 4 ; i++) {
+            Random random = new Random();
+            Task task = manager.getTaskById(random.nextInt(9));
+
+        }
     }
 }
 

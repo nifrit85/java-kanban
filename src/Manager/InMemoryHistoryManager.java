@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-//    private final CustomLinkedList<Task> historyList = new CustomLinkedList<>();
     private final HashMap<Integer, Node> historyLink = new HashMap<>();
 
     private Node head;
@@ -50,10 +49,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-//    public class CustomLinkedList<T> {
-
-//        private int size = 0;
-
         public void linkLast(Task task) {
             if (task != null) {
                 final Node oldTail = tail;
@@ -89,10 +84,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         public List<Task> getTasks() {
             ArrayList<Task> history = new ArrayList<>();
             Node next = head;
-            history.add(head.data);
-            while (next != tail) {
-                next = next.next;
-                history.add(next.data);
+            if (head != null) {
+                history.add(head.data);
+                while (next != tail) {
+                    next = next.next;
+                    history.add(next.data);
+                }
             }
             return history;
         }

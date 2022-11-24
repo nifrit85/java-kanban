@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    int Id;
-
+    int id;
     HistoryManager historyManager = Managers.getDefaultHistory();
 
     public void addTask(Task task, EpicTask parent){
@@ -20,8 +19,8 @@ public class InMemoryTaskManager implements TaskManager {
             task.setID(newID);
             if (parent != null){
                 SubTask child = (SubTask) task;
-                child.setParent(parent);
-                parent.addSubTask(child);
+                child.setParent(parent.getId());
+                parent.addSubTask(child.getId());
             }
             updateTask(task);
         }
@@ -38,7 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void clearTasks() {
-        this.Id = 0;
+        this.id = 0;
         clearSimpleTasks();
         clearSubTasks();
         clearEpicTasks();
@@ -142,12 +141,12 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private int getId() {
-        return Id;
+    protected int getId() {
+        return this.id;
     }
 
-    private void setId(int id) {
-        Id = id;
+    protected void setId(int id) {
+        this.id = id;
     }
 
     private void deleteSimpleTaskByID(int Id) {
@@ -233,7 +232,7 @@ public class InMemoryTaskManager implements TaskManager {
         return this.subTasks.getOrDefault(Id, null);
     }
 
-    private Task getTaskByIdInternalUse(int Id) {
+    protected Task getTaskByIdInternalUse(int Id) {
         Task task = getSimpleTaskById(Id);
         if (task != null) {
             return task;

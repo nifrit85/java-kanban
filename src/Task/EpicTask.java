@@ -8,13 +8,10 @@ public class EpicTask extends Task {
         super(name, description);
     }
 
-    public void addSubTask(SubTask subTask) {
-        if (subTask != null) {
-            int subTaskId = subTask.getId();
+    public void addSubTask(int subTaskId) {
             if (!this.subTaskIDs.contains(subTaskId)) {
                 this.subTaskIDs.add(subTaskId);
             }
-        }
     }
 
     public void delSubTask(SubTask subTask){
@@ -42,5 +39,15 @@ public class EpicTask extends Task {
                 ", status=" + status +
                 ", subTaskIDs=" + subTaskIDs.toString() + "}" +
                 System.lineSeparator();
+    }
+
+    @Override
+    public TypeOfTask getTaskType() {
+        return TypeOfTask.EPIC;
+    }
+
+    @Override
+    public String stringForFile() {
+        return super.stringForFile() + System.lineSeparator();
     }
 }

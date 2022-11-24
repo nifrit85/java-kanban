@@ -7,10 +7,8 @@ public class SubTask extends Task {
         super(name, description);
     }
 
-    public void setParent(EpicTask parent) {
-        if (parent != null) {
-            this.parentID = parent.getId();
-        }
+    public void setParent(Integer parentId) {
+            this.parentID = parentId;
     }
 
     public Integer getParentID() {
@@ -31,5 +29,15 @@ public class SubTask extends Task {
                 ", status=" + status +
                 ", Parent=" + parentID + "}" +
                 System.lineSeparator();
+    }
+
+    @Override
+    public TypeOfTask getTaskType() {
+        return TypeOfTask.SUB;
+    }
+
+    @Override
+    public String stringForFile() {
+        return super.stringForFile() + "," + getParentID() + System.lineSeparator() ;
     }
 }

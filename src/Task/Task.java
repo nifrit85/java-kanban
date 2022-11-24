@@ -6,6 +6,14 @@ public abstract class Task {
     String description;
     Status status = Status.NEW;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public void setID(int Id) {
         this.Id = Id;
     }
@@ -35,5 +43,15 @@ public abstract class Task {
         this.description = description;
     }
 
+    public TypeOfTask getTaskType(){
+        return null;
+    }
+    public String stringForFile(){
+        return Id                           + "," +
+                getTaskType().toString()     + "," +
+                getName()                    + "," +
+                getStatus().toString()       + "," +
+                getDescription();
 
+    }
 }

@@ -12,4 +12,14 @@ public class SimpleTask extends Task {
                 ", status=" + status + "}" +
                 System.lineSeparator() ;
     }
+
+    @Override
+    public TypeOfTask getTaskType() {
+        return TypeOfTask.SIMPLE;
+    }
+
+    @Override
+    public String stringForFile() {
+        return super.stringForFile() + System.lineSeparator();
+    }
 }
