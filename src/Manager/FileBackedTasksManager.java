@@ -3,22 +3,18 @@ package Manager;
 import Task.*;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-    String FOLDER;
-    String FILENAME;
 
-    public FileBackedTasksManager(String pathToFile) throws IOException {
+    String pathToFile;
 
-        parsePathToFile(pathToFile);
-
+    public FileBackedTasksManager(String pathToFile) {
+        this.pathToFile = pathToFile;
         try {
             readFile(pathToFile);
         } catch (IOException e) {
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
@@ -79,51 +75,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             if (content.size() != 0) {
                 createDataFromFile(content);
             }
-
-        } catch (FileNotFoundException fileNotFoundException) {
-            try {
-                createFile(pathToFile);
-            } catch (IOException e) {
-                throw e;
-            }
         } catch (IOException e) {
             throw e;
-        }
-    }
-
-    private void createFile(String path) throws IOException {
-        if (FOLDER != null) {
-            Files.createDirectories(Paths.get(FOLDER));
-        }
-        try {
-            Files.createFile(Paths.get(path));
-        } catch (IOException e) {
-            throw e;
-        }
-    }
-
-    private void parsePathToFile(String pathToFile) {
-        String[] split = pathToFile.split("/");
-        if (split.length != 0) {
-            FILENAME = split[split.length - 1];
-            if (split.length > 1) {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < split.length - 1; i++) {
-                    stringBuilder.append(split[i]);
-                    stringBuilder.append("/");
-                }
-                FOLDER = stringBuilder.substring(0, stringBuilder.toString().length() - 1);
-            }
         }
     }
 
     private void save() {
-        String pathToFile;
-        if (FOLDER == null) {
-            pathToFile = FILENAME;
-        } else {
-            pathToFile = FOLDER + "/" + FILENAME;
-        }
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathToFile))) {
 
@@ -256,7 +213,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                     subTask.setStatus(Status.valueOf(lineOfTask[3]));
                     subTask.setParent(Integer.parseInt(lineOfTask[5]));
                     subTasks.put(Integer.parseInt(lineOfTask[0]), subTask);
-
             }
         }
     }

@@ -1,6 +1,11 @@
 import Manager.TaskManager;
 import Task.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Test {
@@ -187,18 +192,57 @@ public class Test {
         manager.addTask(taskEpic, null);
     }
 
-    public void runThirdTest() {
-        System.out.println(manager.getTasks());
-        addSimple();
-        addEpicWith3Sub();
-        addSimple();
-        addEpicWith3Sub();
+    public void runThirdTest(String pathToFile) {
+        Task task;
 
-        for (int i = 0; i < 4 ; i++) {
+        showFileContent(pathToFile);
+        System.out.println("Добавляем Симпл");
+        addSimple();
+        showFileContent(pathToFile);
+        System.out.println("Добавляем Эпик и 3 Саба к нему");
+        addEpicWith3Sub();
+        showFileContent(pathToFile);
+        System.out.println("Добавляем Симпл");
+        addSimple();
+        showFileContent(pathToFile);
+        System.out.println("Добавляем Эпик и 3 Саба к нему");
+        addEpicWith3Sub();
+        showFileContent(pathToFile);
+
+        for (int i = 0; i < 4; i++) {
             Random random = new Random();
-            Task task = manager.getTaskById(random.nextInt(9));
+            int rndInt = random.nextInt(9);
+            System.out.println("Читаем:" + rndInt + " таск");
 
+            task = manager.getTaskById(rndInt);
+            showFileContent(pathToFile);
         }
+
+        System.out.println("Читаем Эпик 2");
+        task = manager.getTaskById(2);
+        showFileContent(pathToFile);
+        System.out.println("Читаем Саб 3");
+        task = manager.getTaskById(3);
+        showFileContent(pathToFile);
+        System.out.println("Удаляем Эпик 2");
+        manager.deleteTaskByID(2);
+        showFileContent(pathToFile);
+    }
+
+    private void showFileContent(String pathToFile) {
+        System.out.println("Содержимое файла:");
+
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(pathToFile))) {
+            List<String> content = new ArrayList<>();
+            while (fileReader.ready()) {
+                System.out.println(fileReader.readLine());
+            }
+            System.out.println("****Конец Файла****");
+        } catch (IOException e) {
+            System.err.println("Упс");
+        }
+
+
     }
 }
 
