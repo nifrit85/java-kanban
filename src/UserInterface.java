@@ -10,12 +10,10 @@ public class UserInterface {
         System.out.println("2 - Работа в памяти");
         Scanner scanner = new Scanner(System.in);
         String typeOfManager = scanner.next();
-        switch (typeOfManager) {
-            case "1":
-                return TypeOfManager.FILE;
-            default:
-                return TypeOfManager.MEMORY;
+        if (typeOfManager.equals("1")) {
+            return TypeOfManager.FILE;
         }
+        return TypeOfManager.MEMORY;
     }
 
     public static String aksUserPath() {

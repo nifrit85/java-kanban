@@ -75,8 +75,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             if (content.size() != 0) {
                 createDataFromFile(content);
             }
-        } catch (IOException e) {
-            throw e;
         }
     }
 
@@ -187,32 +185,39 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 maxId = id;
                 setId(id);
             }
-            switch (TypeOfTask.valueOf(lineOfTask[1])) {
+
+            TypeOfTask typeOfTask = TypeOfTask.valueOf(lineOfTask[1]);
+            String name = lineOfTask[2];
+            Status status = Status.valueOf(lineOfTask[3]);
+            String description = lineOfTask[4];
+
+            switch (typeOfTask) {
                 case SIMPLE:
-                    SimpleTask simpleTask = new SimpleTask(lineOfTask[2], lineOfTask[4]);
-                    simpleTask.setID(Integer.parseInt(lineOfTask[0]));
-                    simpleTask.setStatus(Status.valueOf(lineOfTask[3]));
-                    simpleTasks.put(Integer.parseInt(lineOfTask[0]), simpleTask);
+                    SimpleTask simpleTask = new SimpleTask(name, description);
+                    simpleTask.setID(id);
+                    simpleTask.setStatus(status);
+                    simpleTasks.put(id, simpleTask);
                     break;
 
                 case EPIC:
-                    EpicTask epicTask = new EpicTask(lineOfTask[2], lineOfTask[4]);
-                    epicTask.setID(Integer.parseInt(lineOfTask[0]));
-                    epicTask.setStatus(Status.valueOf(lineOfTask[3]));
+                    EpicTask epicTask = new EpicTask(name, description);
+                    epicTask.setID(id);
+                    epicTask.setStatus(status);
 
-                    ArrayList<Integer> childList = parentAndChilds.get(Integer.parseInt(lineOfTask[0]));
+                    ArrayList<Integer> childList = parentAndChilds.get(id);
                     for (Integer childId : childList) {
                         epicTask.addSubTask(childId);
                     }
-                    epicTasks.put(Integer.parseInt(lineOfTask[0]), epicTask);
+                    epicTasks.put(id, epicTask);
                     break;
 
                 case SUB:
-                    SubTask subTask = new SubTask(lineOfTask[2], lineOfTask[4]);
-                    subTask.setID(Integer.parseInt(lineOfTask[0]));
-                    subTask.setStatus(Status.valueOf(lineOfTask[3]));
-                    subTask.setParent(Integer.parseInt(lineOfTask[5]));
-                    subTasks.put(Integer.parseInt(lineOfTask[0]), subTask);
+                    int parentId = Integer.parseInt(lineOfTask[5]);
+                    SubTask subTask = new SubTask(name, description);
+                    subTask.setID(id);
+                    subTask.setStatus(status);
+                    subTask.setParent(parentId);
+                    subTasks.put(id, subTask);
             }
         }
     }

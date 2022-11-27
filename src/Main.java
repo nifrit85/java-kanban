@@ -19,7 +19,8 @@ public class Main {
                     return;
                 }
             } catch (IOException e) {
-                e.getMessage();
+                System.err.println(e.getMessage());
+                return;
             }
 
         }
