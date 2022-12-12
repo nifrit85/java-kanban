@@ -1,12 +1,16 @@
-package Manager;
+package managers;
 
-import Task.*;
+import task.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.Level;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
+    private static final String NOT_AVAILABLE = "NaN";
     String pathToFile;
 
     public FileBackedTasksManager(String pathToFile) {
@@ -14,13 +18,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         try {
             readFile(pathToFile);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.fillInStackTrace();
         }
-    }
-
-    @Override
-    public Map<Integer, Task> getTasks() {
-        return super.getTasks();
     }
 
     @Override
@@ -30,14 +29,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public void deleteTaskByID(int Id) {
-        super.deleteTaskByID(Id);
+    public void deleteTaskByID(int id) {
+        super.deleteTaskByID(id);
         save();
     }
 
     @Override
-    public Task getTaskById(int Id) {
-        Task task = super.getTaskById(Id);
+    public Task getTaskById(int id) {
+        Task task = super.getTaskById(id);
         save();
         return task;
     }
@@ -56,11 +55,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public List<Task> getHistory() {
-        return super.getHistory();
-    }
-
-    @Override
     public void addTask(Task task, EpicTask parent) {
         super.addTask(task, parent);
         save();
@@ -72,7 +66,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             while (fileReader.ready()) {
                 content.add(fileReader.readLine());
             }
-            if (content.size() != 0) {
+            if (!content.isEmpty()) {
                 createDataFromFile(content);
             }
         }
@@ -96,7 +90,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             saveHistoryToFile(bufferedWriter);
 
         } catch (IOException e) {
-            System.err.println("Не удалось записать данные в файл");
+            log.log(Level.WARNING, "Не удалось записать данные в файл");
+
         }
     }
 
@@ -115,29 +110,31 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private void createDataFromFile(List<String> content) {
 
-        List<List<String>> splitedContent = splitContentForTaskAndHistory(content);
-        if (splitedContent.size() > 1) {
-            List<String[]> parsedLinesOfTasks = parseTaskFromContent(splitedContent.get(0));
+        List<List<String>> splittedContent = splitContentForTaskAndHistory(content);
+        if (splittedContent.size() > 1) {
+            List<String[]> parsedLinesOfTasks = parseTaskFromContent(splittedContent.get(0));
             Map<Integer, ArrayList<Integer>> parentAndChilds = getParentAndChilds(parsedLinesOfTasks);
             addTasksFromFile(parsedLinesOfTasks, parentAndChilds);
         }
-        if (splitedContent.size() == 2) {
-            List<String> historyList = parseHistoryFromContent(splitedContent.get(1).get(0));
+
+        if (splittedContent.size() == 2 && !splittedContent.get(1).isEmpty()) {
+            List<String> historyList = parseHistoryFromContent(splittedContent.get(1).get(0));
             addHistoryFromFile(historyList);
         }
+
     }
 
     private Map<Integer, ArrayList<Integer>> getParentAndChilds(List<String[]> content) {
         Map<Integer, ArrayList<Integer>> parentAndChilds = new HashMap<>();
 
         for (String[] line : content) {
-            if (line.length == 6) {
+            if (line.length == 8) {
                 ArrayList<Integer> childs = new ArrayList<>();
-                if (parentAndChilds.containsKey(Integer.parseInt(line[5]))) {
-                    childs = parentAndChilds.get(Integer.parseInt(line[5]));
+                if (parentAndChilds.containsKey(Integer.parseInt(line[7]))) {
+                    childs = parentAndChilds.get(Integer.parseInt(line[7]));
                 }
                 childs.add(Integer.parseInt(line[0]));
-                parentAndChilds.put(Integer.parseInt(line[5]), childs);
+                parentAndChilds.put(Integer.parseInt(line[7]), childs);
             }
         }
         return parentAndChilds;
@@ -160,13 +157,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         List<String> tasksList = new ArrayList<>();
         List<String> historyList = new ArrayList<>();
 
-        boolean is_history_found = false;
+        boolean isHistoryFound = false;
         for (String line : content) {
             if (line.isEmpty()) {
-                is_history_found = true;
+                isHistoryFound = true;
                 continue;
             }
-            if (!is_history_found) {
+            if (!isHistoryFound) {
                 tasksList.add(line);
             } else {
                 historyList.add(line);
@@ -190,34 +187,38 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             String name = lineOfTask[2];
             Status status = Status.valueOf(lineOfTask[3]);
             String description = lineOfTask[4];
+            LocalDateTime startTime = null;
+            if (!lineOfTask[5].equals(NOT_AVAILABLE)) startTime = LocalDateTime.parse(lineOfTask[5]);
+
+            Duration duration = Duration.parse(lineOfTask[6]);
 
             switch (typeOfTask) {
                 case SIMPLE:
-                    SimpleTask simpleTask = new SimpleTask(name, description);
+                    SimpleTask simpleTask = new SimpleTask(name, description, status, startTime, duration);
                     simpleTask.setID(id);
-                    simpleTask.setStatus(status);
-                    simpleTasks.put(id, simpleTask);
+                    updateTask(simpleTask);
                     break;
 
                 case EPIC:
-                    EpicTask epicTask = new EpicTask(name, description);
+                    EpicTask epicTask = new EpicTask(name, description, status);
                     epicTask.setID(id);
-                    epicTask.setStatus(status);
-
+                    epicTask.setStartTime(startTime);
+                    epicTask.setDuration(duration);
                     ArrayList<Integer> childList = parentAndChilds.get(id);
-                    for (Integer childId : childList) {
-                        epicTask.addSubTask(childId);
+                    if (childList != null) {
+                        for (Integer childId : childList) {
+                            epicTask.addSubTask(childId);
+                        }
                     }
-                    epicTasks.put(id, epicTask);
+                    updateTask(epicTask);
                     break;
 
                 case SUB:
-                    int parentId = Integer.parseInt(lineOfTask[5]);
-                    SubTask subTask = new SubTask(name, description);
+                    int parentId = Integer.parseInt(lineOfTask[7]);
+                    SubTask subTask = new SubTask(name, description, status, startTime, duration);
                     subTask.setID(id);
-                    subTask.setStatus(status);
                     subTask.setParent(parentId);
-                    subTasks.put(id, subTask);
+                    updateTask(subTask);
             }
         }
     }

@@ -1,6 +1,6 @@
-package Manager;
+package managers;
 
-import Task.Task;
+import task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +13,9 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node tail;
 
     static class Node {
-        public Task data;
-        public Node next;
-        public Node prev;
+        private final Task data;
+        private Node next;
+        private Node prev;
 
         public Node(Node prev, Task task, Node next) {
             this.data = task;
@@ -93,7 +93,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
             return history;
         }
-//    }
 
     @Override
     public void add(Task task) {

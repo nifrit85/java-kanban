@@ -1,4 +1,6 @@
-import Manager.TypeOfManager;
+package utilities;
+
+import managers.TypeOfManager;
 
 import java.util.Scanner;
 
@@ -8,6 +10,7 @@ public class UserInterface {
         System.out.println("Выберите режим работы:");
         System.out.println("1 - Работа с файлом");
         System.out.println("2 - Работа в памяти");
+
         Scanner scanner = new Scanner(System.in);
         String typeOfManager = scanner.next();
         if (typeOfManager.equals("1")) {

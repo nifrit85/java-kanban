@@ -1,4 +1,4 @@
-package Manager;
+package managers;
 
 public enum TypeOfManager {
     FILE,
