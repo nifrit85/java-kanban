@@ -1,5 +1,8 @@
 package task;
 
+import constant.Status;
+import constant.TypeOfTask;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 

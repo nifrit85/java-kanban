@@ -1,5 +1,8 @@
 package managers;
 
+import constant.Status;
+import constant.TypeOfTask;
+import managers.interfaces.TaskManager;
 import task.*;
 
 import java.io.*;
@@ -9,6 +12,11 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
+
+//    Map<Integer, SimpleTask> simpleTasks = new HashMap<>();
+//    Map<Integer, SubTask> subTasks = new HashMap<>();
+//    Map<Integer, EpicTask> epicTasks = new HashMap<>();
+//    Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
 
     private static final String NOT_AVAILABLE = "NaN";
     String pathToFile;
@@ -49,9 +57,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     @Override
     public Map<Integer, SubTask> getSubTaskFromEpic(EpicTask parent) {
-        Map<Integer, SubTask> subTasks = super.getSubTaskFromEpic(parent);
+        Map<Integer, SubTask> subTasksFromEpic = super.getSubTaskFromEpic(parent);
         save();
-        return subTasks;
+        return subTasksFromEpic;
     }
 
     @Override

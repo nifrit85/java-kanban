@@ -1,6 +1,6 @@
 package utilities;
 
-import managers.TypeOfManager;
+import constant.TypeOfManager;
 
 import java.util.Scanner;
 

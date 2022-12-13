@@ -1,5 +1,8 @@
 package task;
 
+import constant.Status;
+import constant.TypeOfTask;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
