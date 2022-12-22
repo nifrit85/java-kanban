@@ -1,4 +1,5 @@
 import constant.Status;
+import exceptions.IntersectionsException;
 import managers.interfaces.TaskManager;
 import task.*;
 
@@ -15,17 +16,31 @@ public class Test {
         this.manager = manager;
     }
 
-    private void addSimple() {
+    private void addSimple(){
         SimpleTask task = new SimpleTask("Name", "Descr", Status.NEW, LocalDateTime.now(), Duration.ofDays(1));
-        manager.addTask(task, null);
+        try {
+            manager.addTask(task, null);
+        }catch (IntersectionsException e){
+            System.err.println(e.getMessage());
+        }
+
     }
 
-    private void addEpicWith3Sub() {
+    private void addEpicWith3Sub(){
         EpicTask epicTask = new EpicTask("Name", "Descr", Status.NEW);
-        manager.addTask(epicTask, null);
+        try {
+            manager.addTask(epicTask, null);
+        }catch (IntersectionsException e){
+            System.err.println(e.getMessage());
+        }
+
         for (int i = 1; i <= 3; i++) {
             SubTask subTask = new SubTask("Name" + i, "Descr" + i, Status.NEW, LocalDateTime.now().plusDays(i), Duration.ofHours(i * 10));
-            manager.addTask(subTask, epicTask);
+            try {
+                manager.addTask(subTask, epicTask);
+            }catch (IntersectionsException e){
+                System.err.println(e.getMessage());
+            }
         }
     }
 
@@ -48,7 +63,12 @@ public class Test {
         System.out.println(id + " -> " + status);
         SubTask sub = (SubTask) manager.getTaskById(id);
         sub.setStatus(status);
-        manager.updateTask(sub);
+        try {
+            manager.updateTask(sub);
+        }catch (IntersectionsException e){
+            System.err.println(e.getMessage());
+        }
+
     }
 
     private void showSubOfEpic(int id) {
@@ -70,7 +90,12 @@ public class Test {
         showPrioritizedTasks();
         showFileContent(pathToFile);
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        manager.addTask(epicTaskToAdd, null);
+        try {
+            manager.addTask(epicTaskToAdd, null);
+        }catch (IntersectionsException e){
+            System.err.println(e.getMessage());
+        }
+
 //        System.out.println("Добавляем Симпл");
 //        addSimple();
 //        showPrioritizedTasks();

@@ -28,7 +28,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     Logger log = Logger.getAnonymousLogger();
 
-    public void addTask(Task task, EpicTask parent) {
+    public void addTask(Task task, EpicTask parent) throws IntersectionsException {
         if (task != null) {
             int currentId = getId();
             setId(getNewID(currentId));
@@ -72,9 +72,6 @@ public class InMemoryTaskManager implements TaskManager {
         deleteSimpleTaskByID(id);
         deleteSubTaskByID(id);
         deleteEpicTaskByID(id);
-        historyManager.remove(id);
-        prioritizedTasks.removeIf(task -> task.getId() == id);
-
     }
 
     @Override
@@ -95,7 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws IntersectionsException {
         if (task != null) {
             switch (task.getTaskType()) {
                 case EPIC:
@@ -109,17 +106,12 @@ public class InMemoryTaskManager implements TaskManager {
                         if (parent != null) {
                             parent.delSubTask((SubTask) task);
                         }
-                        log.log(Level.WARNING, e.getMessage());
-                        return;
+                        throw new IntersectionsException(task.getId());
                     }
                     break;
                 case SIMPLE:
-                    try {
                         updateSimpleTask((SimpleTask) task);
-                    } catch (IntersectionsException e) {
-                        log.log(Level.WARNING, e.getMessage());
-                        return;
-                    }
+
             }
             prioritizedTasks.removeIf(t -> t.getId() == task.getId());
             prioritizedTasks.add(task);
@@ -155,30 +147,30 @@ public class InMemoryTaskManager implements TaskManager {
         return prioritizedTasks;
     }
 
-    private Map<Integer, SimpleTask> getSimpleTasks() {
+    public Map<Integer, SimpleTask> getSimpleTasks() {
         return simpleTasks;
     }
 
-    private Map<Integer, SubTask> getSubTasks() {
+    public Map<Integer, SubTask> getSubTasks() {
         return subTasks;
     }
 
-    private Map<Integer, EpicTask> getEpicTasks() {
+    public Map<Integer, EpicTask> getEpicTasks() {
         return epicTasks;
     }
 
-    private void clearSimpleTasks() {
+    public void clearSimpleTasks() {
         simpleTasks.clear();
     }
 
-    private void clearSubTasks() {
+    public void clearSubTasks() {
         subTasks.clear();
         for (Map.Entry<Integer, EpicTask> epicTaskEntry : epicTasks.entrySet()) {
             epicTaskEntry.getValue().clearSubTasks();
         }
     }
 
-    private void clearEpicTasks() {
+    public void clearEpicTasks() {
         epicTasks.clear();
     }
 
@@ -190,11 +182,13 @@ public class InMemoryTaskManager implements TaskManager {
         this.id = id;
     }
 
-    private void deleteSimpleTaskByID(int id) {
+    public void deleteSimpleTaskByID(int id) {
         simpleTasks.remove(id);
+        historyManager.remove(id);
+        prioritizedTasks.removeIf(task -> task.getId() == id);
     }
 
-    private void deleteSubTaskByID(int id) {
+    public void deleteSubTaskByID(int id) {
         if (subTasks.containsKey(id)) {
             SubTask subTask = subTasks.get(id);
             EpicTask parent = epicTasks.get(subTask.getParentID());
@@ -204,9 +198,11 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         subTasks.remove(id);
+        historyManager.remove(id);
+        prioritizedTasks.removeIf(task -> task.getId() == id);
     }
 
-    private void deleteEpicTaskByID(int id) {
+    public void deleteEpicTaskByID(int id) {
         if (epicTasks.containsKey(id)) {
             Map<Integer, SubTask> subTasksFromEpic = getSubTaskFromEpic(epicTasks.get(id));
             for (Map.Entry<Integer, SubTask> subTask : subTasksFromEpic.entrySet()) {
@@ -217,6 +213,8 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         epicTasks.remove(id);
+        historyManager.remove(id);
+        prioritizedTasks.removeIf(task -> task.getId() == id);
     }
 
     private void updateSimpleTask(SimpleTask simpleTask) throws IntersectionsException {

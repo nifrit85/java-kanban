@@ -2,6 +2,7 @@ package managers;
 
 import constant.Status;
 import constant.TypeOfTask;
+import exceptions.IntersectionsException;
 import managers.interfaces.TaskManager;
 import task.*;
 
@@ -12,11 +13,6 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-
-//    Map<Integer, SimpleTask> simpleTasks = new HashMap<>();
-//    Map<Integer, SubTask> subTasks = new HashMap<>();
-//    Map<Integer, EpicTask> epicTasks = new HashMap<>();
-//    Set<Task> prioritizedTasks = new TreeSet<>(taskComparator);
 
     private static final String NOT_AVAILABLE = "NaN";
     String pathToFile;
@@ -50,7 +46,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws IntersectionsException {
         super.updateTask(task);
         save();
     }
@@ -63,7 +59,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public void addTask(Task task, EpicTask parent) {
+    public void addTask(Task task, EpicTask parent) throws IntersectionsException {
         super.addTask(task, parent);
         save();
     }
@@ -204,7 +200,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 case SIMPLE:
                     SimpleTask simpleTask = new SimpleTask(name, description, status, startTime, duration);
                     simpleTask.setID(id);
-                    updateTask(simpleTask);
+                    try {
+                        updateTask(simpleTask);
+                    }catch (IntersectionsException e){
+                        log.log(Level.WARNING,e.getMessage());
+                    }
+
                     break;
 
                 case EPIC:
@@ -218,7 +219,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                             epicTask.addSubTask(childId);
                         }
                     }
-                    updateTask(epicTask);
+                    try {
+                        updateTask(epicTask);
+                    }catch (IntersectionsException e){
+                        log.log(Level.WARNING,e.getMessage());
+                    }
                     break;
 
                 case SUB:
@@ -226,7 +231,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                     SubTask subTask = new SubTask(name, description, status, startTime, duration);
                     subTask.setID(id);
                     subTask.setParent(parentId);
-                    updateTask(subTask);
+                    try {
+                        updateTask(subTask);
+                    }catch (IntersectionsException e){
+                        log.log(Level.WARNING,e.getMessage());
+                    }
             }
         }
     }
@@ -235,5 +244,41 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         for (String historyId : historyList) {
             historyManager.add(getTaskByIdInternalUse(Integer.parseInt(historyId)));
         }
+    }
+
+    @Override
+    public void clearSimpleTasks() {
+        super.clearSimpleTasks();
+        save();
+    }
+
+    @Override
+    public void clearSubTasks() {
+        super.clearSubTasks();
+        save();
+    }
+
+    @Override
+    public void clearEpicTasks() {
+        super.clearEpicTasks();
+        save();
+    }
+
+    @Override
+    public void deleteSimpleTaskByID(int id) {
+        super.deleteSimpleTaskByID(id);
+        save();
+    }
+
+    @Override
+    public void deleteSubTaskByID(int id) {
+        super.deleteSubTaskByID(id);
+        save();
+    }
+
+    @Override
+    public void deleteEpicTaskByID(int id) {
+        super.deleteEpicTaskByID(id);
+        save();
     }
 }

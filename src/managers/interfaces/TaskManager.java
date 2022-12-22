@@ -1,6 +1,8 @@
 package managers.interfaces;
 
+import exceptions.IntersectionsException;
 import task.EpicTask;
+import task.SimpleTask;
 import task.SubTask;
 import task.Task;
 
@@ -26,9 +28,7 @@ public interface TaskManager {
         return t1.getStartTime().compareTo(t2.getStartTime());
     };
 
-
-
-    void addTask(Task task, EpicTask parent);
+    void addTask(Task task, EpicTask parent) throws IntersectionsException;
 
     Map<Integer, Task> getTasks();
 
@@ -38,7 +38,7 @@ public interface TaskManager {
 
     Task getTaskById(int id);
 
-    void updateTask(Task task);
+    void updateTask(Task task) throws IntersectionsException;
 
     Map<Integer, SubTask> getSubTaskFromEpic(EpicTask parent);
 
@@ -47,4 +47,18 @@ public interface TaskManager {
     Set<Task> getPrioritizedTasks();
 
     void clearHistory();
+
+    Map<Integer, SimpleTask> getSimpleTasks();
+    Map<Integer, SubTask> getSubTasks();
+    Map<Integer, EpicTask> getEpicTasks();
+
+    void clearSimpleTasks();
+    void clearSubTasks();
+    void clearEpicTasks();
+
+    void deleteSimpleTaskByID(int id);
+    void deleteSubTaskByID(int id);
+    void deleteEpicTaskByID(int id);
+
+
 }

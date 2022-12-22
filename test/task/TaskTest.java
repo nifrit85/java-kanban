@@ -2,6 +2,7 @@ package task;
 
 import constant.Status;
 import constant.TypeOfManager;
+import exceptions.IntersectionsException;
 import managers.Managers;
 import managers.interfaces.TaskManager;
 import org.junit.jupiter.api.AfterEach;
@@ -25,18 +26,32 @@ class TaskTest {
         //Наполняем менеджер идентичным состоянием перед каждым тестом
         //Один Эпик
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        manager.addTask(epicTaskToAdd, null);
+        try {
+            manager.addTask(epicTaskToAdd, null);
+        } catch (IntersectionsException e) {
+        }
         //Три сабтаска для эпика
         SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
-        manager.addTask(subTaskToAdd, epicTaskToAdd);
+        try {
+            manager.addTask(subTaskToAdd, epicTaskToAdd);
+        } catch (IntersectionsException e) {
+        }
         subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 00), Duration.ofHours(20));
-        manager.addTask(subTaskToAdd, epicTaskToAdd);
+        try {
+            manager.addTask(subTaskToAdd, epicTaskToAdd);
+        } catch (IntersectionsException e) {
+        }
         subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
-        manager.addTask(subTaskToAdd, epicTaskToAdd);
+        try {
+            manager.addTask(subTaskToAdd, epicTaskToAdd);
+        } catch (IntersectionsException e) {
+        }
         //Один Симпл
         SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(30));
-        manager.addTask(simpleTaskToAdd, null);
-
+        try {
+            manager.addTask(simpleTaskToAdd, null);
+        } catch (IntersectionsException e) {
+        }
         epicTask = (EpicTask) manager.getTaskById(1);
         subTask = (SubTask) manager.getTaskById(2);
         simpleTask = (SimpleTask) manager.getTaskById(5);
