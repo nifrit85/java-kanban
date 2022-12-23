@@ -56,14 +56,7 @@ public class EpicTask extends Task {
         else stringEndTime = endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss"));
 
 
-        return "Epic{" + "Id=" + id +
-                ", name='" + name + "' " +
-                ", description='" + description + "' " +
-                ", status=" + status +
-                ", startTime = " + stringStartTime +
-                ", duration = " + stringDuration +
-                ", endTime = " + stringEndTime +
-                ", subTaskIDs=" + subTaskIDs.toString() + "}" + System.lineSeparator();
+        return "Epic{" + "Id=" + id + ", name='" + name + "' " + ", description='" + description + "' " + ", status=" + status + ", startTime = " + stringStartTime + ", duration = " + stringDuration + ", endTime = " + stringEndTime + ", subTaskIDs=" + subTaskIDs.toString() + "}" + System.lineSeparator();
     }
 
     @Override

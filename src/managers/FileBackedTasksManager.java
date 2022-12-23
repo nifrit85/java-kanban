@@ -7,6 +7,7 @@ import managers.interfaces.TaskManager;
 import task.*;
 
 import java.io.*;
+import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -20,10 +21,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     public FileBackedTasksManager(String pathToFile) {
         this.pathToFile = pathToFile;
         try {
-            readFile(pathToFile);
+            readFile();
         } catch (IOException e) {
-            e.fillInStackTrace();
+            log.log(Level.WARNING, e.getMessage());
         }
+    }
+
+    public FileBackedTasksManager(URI path) {
+        this.pathToFile = path.toString();
     }
 
     @Override
@@ -64,7 +69,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         save();
     }
 
-    private void readFile(String pathToFile) throws IOException {
+    protected void readFile() throws IOException {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(pathToFile))) {
             List<String> content = new ArrayList<>();
             while (fileReader.ready()) {
@@ -76,7 +81,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    private void save() {
+    protected void save() {
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathToFile))) {
 
@@ -186,7 +191,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 maxId = id;
                 setId(id);
             }
-
             TypeOfTask typeOfTask = TypeOfTask.valueOf(lineOfTask[1]);
             String name = lineOfTask[2];
             Status status = Status.valueOf(lineOfTask[3]);
@@ -200,30 +204,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 case SIMPLE:
                     SimpleTask simpleTask = new SimpleTask(name, description, status, startTime, duration);
                     simpleTask.setID(id);
-                    try {
-                        updateTask(simpleTask);
-                    }catch (IntersectionsException e){
-                        log.log(Level.WARNING,e.getMessage());
-                    }
-
+                    addSimpleTaskFromFile(simpleTask);
                     break;
-
                 case EPIC:
                     EpicTask epicTask = new EpicTask(name, description, status);
                     epicTask.setID(id);
                     epicTask.setStartTime(startTime);
                     epicTask.setDuration(duration);
                     ArrayList<Integer> childList = parentAndChilds.get(id);
-                    if (childList != null) {
-                        for (Integer childId : childList) {
-                            epicTask.addSubTask(childId);
-                        }
-                    }
-                    try {
-                        updateTask(epicTask);
-                    }catch (IntersectionsException e){
-                        log.log(Level.WARNING,e.getMessage());
-                    }
+                    addEpicTaskFromFile(epicTask, childList);
                     break;
 
                 case SUB:
@@ -231,11 +220,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                     SubTask subTask = new SubTask(name, description, status, startTime, duration);
                     subTask.setID(id);
                     subTask.setParent(parentId);
-                    try {
-                        updateTask(subTask);
-                    }catch (IntersectionsException e){
-                        log.log(Level.WARNING,e.getMessage());
-                    }
+                    addSubTaskFromFile(subTask);
             }
         }
     }
@@ -280,5 +265,35 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     public void deleteEpicTaskByID(int id) {
         super.deleteEpicTaskByID(id);
         save();
+    }
+
+    private void addSimpleTaskFromFile(SimpleTask simpleTask) {
+        try {
+            updateTask(simpleTask);
+        } catch (IntersectionsException e) {
+            log.log(Level.WARNING, e.getMessage());
+        }
+    }
+
+    private void addEpicTaskFromFile(EpicTask epicTask, ArrayList<Integer> childList) {
+        if (childList != null) {
+            for (Integer childId : childList) {
+                epicTask.addSubTask(childId);
+            }
+        }
+        try {
+            updateTask(epicTask);
+        } catch (IntersectionsException e) {
+            log.log(Level.WARNING, e.getMessage());
+        }
+    }
+
+    private void addSubTaskFromFile(SubTask subTask) {
+        try {
+            updateTask(subTask);
+        } catch (IntersectionsException e) {
+            log.log(Level.WARNING, e.getMessage());
+        }
+
     }
 }

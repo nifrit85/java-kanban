@@ -49,15 +49,21 @@ public interface TaskManager {
     void clearHistory();
 
     Map<Integer, SimpleTask> getSimpleTasks();
+
     Map<Integer, SubTask> getSubTasks();
+
     Map<Integer, EpicTask> getEpicTasks();
 
     void clearSimpleTasks();
+
     void clearSubTasks();
+
     void clearEpicTasks();
 
     void deleteSimpleTaskByID(int id);
+
     void deleteSubTaskByID(int id);
+
     void deleteEpicTaskByID(int id);
 
 

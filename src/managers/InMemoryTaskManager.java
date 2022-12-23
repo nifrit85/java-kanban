@@ -13,7 +13,6 @@ import task.Task;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -110,7 +109,7 @@ public class InMemoryTaskManager implements TaskManager {
                     }
                     break;
                 case SIMPLE:
-                        updateSimpleTask((SimpleTask) task);
+                    updateSimpleTask((SimpleTask) task);
 
             }
             prioritizedTasks.removeIf(t -> t.getId() == task.getId());

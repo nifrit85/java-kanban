@@ -22,7 +22,7 @@ public class SubTask extends Task {
         return parentID;
     }
 
-    public void clearParent(){
+    public void clearParent() {
         this.parentID = null;
     }
 
@@ -38,7 +38,7 @@ public class SubTask extends Task {
 
     @Override
     public String stringForFile() {
-        return super.stringForFile() + "," + getParentID() + System.lineSeparator() ;
+        return super.stringForFile() + "," + getParentID() + System.lineSeparator();
     }
 
 }

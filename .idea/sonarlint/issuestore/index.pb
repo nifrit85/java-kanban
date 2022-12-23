@@ -11,13 +11,7 @@ I
 test/resources/no_history,e\2\e2b26cfe188f7ca7df637eaaed5f43dd79885b40
 E
 test/resources/no_sub,1\8\18f8ae74df18524479e9dd4d450ff33c8de48086
-N
-src/utilities/FileManager.java,9\4\94a0d95d6c740338e78956a71629acb0bf2106bc
-P
- src/utilities/UserInterface.java,b\4\b47e4cdad5481e2657073b9ac8c015a3cea73c68
 M
 test/task/SimpleTaskTest.java,b\b\bb148bbe1c460e67b7690ecc8c587aaaa8f037d3
 J
 test/task/SubTaskTest.java,d\2\d28b9394cbccb25b6e21e17550ca52b3b0c3bb27
-F
-src/task/EpicTask.java,1\3\1308bcb129fa895a519d8288eb6c8dc9909a8245

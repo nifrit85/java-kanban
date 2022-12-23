@@ -41,7 +41,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(simpleTaskToAdd, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -49,7 +49,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
         try {
             manager.addTask(epicTaskToAdd, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -57,26 +57,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(subTaskToAdd, epicTaskToAdd);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 00), Duration.ofHours(20));
         try {
             manager.addTask(subTaskToAdd, epicTaskToAdd);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
         try {
             manager.addTask(subTaskToAdd, epicTaskToAdd);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         //Один Эпик без подзадач
         epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
         try {
             manager.addTask(epicTaskToAdd, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -109,7 +109,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         //Тестируем получение списка всех тасков при добавлении неверного таска
         try {
             manager.addTask(null, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -119,7 +119,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SimpleTask NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 01, 20, 14, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(NewSimpleTask, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -134,7 +134,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 01, 20, 14, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(NewSimpleTask, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -152,22 +152,22 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         EpicTask epicTask = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
         try {
             manager.addTask(epicTask, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         try {
             manager.addTask(null, epicTask);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         try {
             manager.addTask(null, epicTask);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         try {
             manager.addTask(null, epicTask);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -201,7 +201,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SimpleTask simpleTask1 = new SimpleTask("NameSimple1", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2023, 12, 22, 14, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(simpleTask1, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -209,7 +209,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SimpleTask simpleTask2 = new SimpleTask("NameSimple2", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(simpleTask2, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -217,7 +217,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SimpleTask simpleTaskBad = new SimpleTask("NameSimpleBad", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 00), Duration.ofHours(10));
         try {
             manager.addTask(simpleTaskBad, null);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -234,7 +234,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         SubTask subTaskNew = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
         try {
             manager.addTask(subTaskNew, epicTask);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
 
@@ -275,7 +275,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subTaskOne.setStatus(Status.DONE);
         try {
             manager.updateTask(subTaskOne);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         assertEquals(Status.IN_PROGRESS, epicTask.getStatus());
@@ -284,19 +284,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subTaskOne.setStatus(Status.IN_PROGRESS);
         try {
             manager.updateTask(subTaskOne);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskTwo.setStatus(Status.IN_PROGRESS);
         try {
             manager.updateTask(subTaskTwo);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskThree.setStatus(Status.IN_PROGRESS);
         try {
             manager.updateTask(subTaskThree);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         assertEquals(Status.IN_PROGRESS, epicTask.getStatus());
@@ -309,19 +309,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subTaskOne.setStatus(Status.DONE);
         try {
             manager.updateTask(subTaskOne);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskTwo.setStatus(Status.DONE);
         try {
             manager.updateTask(subTaskTwo);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         subTaskThree.setStatus(Status.DONE);
         try {
             manager.updateTask(subTaskThree);
-        }catch (IntersectionsException e){
+        } catch (IntersectionsException e) {
 
         }
         assertEquals(Status.DONE, manager.getTaskById(2).getStatus());

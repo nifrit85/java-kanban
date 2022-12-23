@@ -22,10 +22,7 @@ public class KVTaskClient {
 
     private String register() throws IOException, InterruptedException {
         String body = null;
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/register"))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/register")).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == HttpURLConnection.HTTP_OK) {
             body = response.body();
@@ -34,19 +31,13 @@ public class KVTaskClient {
     }
 
     public void put(String key, String json) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken))
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken)).POST(HttpRequest.BodyPublishers.ofString(json)).build();
+        client.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     public String load(String key) throws IOException, InterruptedException {
         String body = null;
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken)).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == HttpURLConnection.HTTP_OK) {
             body = response.body();

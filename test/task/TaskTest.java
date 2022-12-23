@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -20,7 +21,6 @@ class TaskTest {
     protected SubTask subTask;
     protected SimpleTask simpleTask;
     protected TaskManager manager = Managers.getManager(TypeOfManager.MEMORY, null);
-
     @BeforeEach
     public void BeforeEach() {
         //Наполняем менеджер идентичным состоянием перед каждым тестом

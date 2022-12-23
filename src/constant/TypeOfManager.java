@@ -1,6 +1,5 @@
 package constant;
 
 public enum TypeOfManager {
-    FILE,
-    MEMORY
+    FILE, MEMORY, HTTP
 }

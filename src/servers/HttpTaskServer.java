@@ -5,10 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import constant.TypeOfManager;
 import constant.TypeOfTask;
 import exceptions.IntersectionsException;
-import managers.Managers;
 import managers.interfaces.TaskManager;
 import task.EpicTask;
 import task.SimpleTask;
@@ -29,17 +27,24 @@ public class HttpTaskServer {
 
     private static final int PORT = 8080;
 
-    private static final TaskManager taskManager = Managers.getManager(TypeOfManager.FILE, "1");;
+    private static TaskManager taskManager;
 
     private static final Gson gson = new GsonBuilder().serializeNulls().create();
-
-    private final HttpServer server;
 
     public static final String JSON = "application/json";
     private static final String TEXT = "text/plain";
 
-    public HttpTaskServer() throws IOException {
+    private static final String GOOD_PATTERN = "^/tasks/?(task/?|epic/?|subtask/?)*";
 
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+    private static final String DELETE = "DELETE";
+
+    private HttpServer server;
+
+
+    public HttpTaskServer(TaskManager manager) throws IOException {
+        taskManager = manager;
         server = HttpServer.create();
         server.bind(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks/task", new SimpleTaskHandler());
@@ -51,6 +56,10 @@ public class HttpTaskServer {
 
     public void start() {
         server.start();
+    }
+
+    public void stop() {
+        server.stop(0);
     }
 
     static void sendResponse(HttpExchange exchange, String contentType, String response, int rCode) throws IOException {
@@ -74,10 +83,11 @@ public class HttpTaskServer {
         exchange.close();
     }
 
-    static private void processGet(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private static void processGet(HttpExchange exchange, TypeOfTask type) throws IOException {
         String query = exchange.getRequestURI().getQuery();
         String path = exchange.getRequestURI().getPath();
-        if (!Pattern.matches("^/tasks/?(task/?|epic/?|subtask/?)*", path)) {
+        //Исключим неверные обращения
+        if (!Pattern.matches(GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -96,8 +106,8 @@ public class HttpTaskServer {
                     break;
             }
             sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
-        } else if (query.startsWith("id=") &
-                Pattern.matches("^/tasks/(task|epic|subtask)/$", path)) {
+
+        } else if (query.startsWith("id=") && Pattern.matches("^/tasks/(task|epic|subtask)/$", path)) {
             id = Integer.parseInt(query.substring(3));
             Task task = taskManager.getTaskById(id);
             if (task == null) {
@@ -110,7 +120,8 @@ public class HttpTaskServer {
             } else { //Запросили тип задачи не из того Эндпоинта
                 sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             }
-        } else if (query.startsWith("id=") & path.equals("/tasks/subtask/epic/")) {
+            //Отдельная обработка Эпика для подзадачи
+        } else if (query.startsWith("id=") && path.equals("/tasks/subtask/epic/")) {
             id = Integer.parseInt(query.substring(3));
             Task epicTask = taskManager.getTaskById(id);
             if (epicTask == null || epicTask.getTaskType() != TypeOfTask.EPIC) {
@@ -125,12 +136,13 @@ public class HttpTaskServer {
         }
     }
 
-    static private void processPost(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private static void processPost(HttpExchange exchange, TypeOfTask type) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
         String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
-        boolean is_not_found = false;
+        boolean isNotFound = false;
         String path = exchange.getRequestURI().getPath();
-        if (!Pattern.matches("^/tasks/?(task/?|epic/?|subtask/?)*", path)) {
+        //Исключим неверные обращения
+        if (!Pattern.matches(GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -154,7 +166,7 @@ public class HttpTaskServer {
                         sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
-                } else is_not_found = true;
+                } else isNotFound = true;
                 break;
             case SUB:
                 SubTask subTask = gson.fromJson(body, SubTask.class);
@@ -173,7 +185,7 @@ public class HttpTaskServer {
                         sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
-                } else is_not_found = true;
+                } else isNotFound = true;
                 break;
             case EPIC:
                 EpicTask epicTask = gson.fromJson(body, EpicTask.class);
@@ -192,13 +204,13 @@ public class HttpTaskServer {
                         sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
-                } else is_not_found = true;
+                } else isNotFound = true;
                 break;
         }
 
         Map<Integer, Task> allTaskMap = taskManager.getTasks();
 
-        if (is_not_found & allTaskMap.containsKey(task.getId())) {//Задача есть, но ошиблись типом
+        if (isNotFound && allTaskMap.containsKey(task.getId())) {//Задача есть, но ошиблись типом
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
 
         } else { //Новый
@@ -211,10 +223,10 @@ public class HttpTaskServer {
         }
     }
 
-    static private void processDelete(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private static void processDelete(HttpExchange exchange, TypeOfTask type) throws IOException {
         String query = exchange.getRequestURI().getQuery();
         String path = exchange.getRequestURI().getPath();
-        if (!Pattern.matches("^/tasks/?(task/?|epic/?|subtask/?)*", path)) {
+        if (!Pattern.matches(GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -256,13 +268,13 @@ public class HttpTaskServer {
             String method = exchange.getRequestMethod();
 
             switch (method) {
-                case "GET":
+                case GET:
                     processGet(exchange, TypeOfTask.SIMPLE);
                     break;
-                case "POST":
+                case POST:
                     processPost(exchange, TypeOfTask.SIMPLE);
                     break;
-                case "DELETE":
+                case DELETE:
                     processDelete(exchange, TypeOfTask.SIMPLE);
                     break;
                 default:
@@ -278,13 +290,13 @@ public class HttpTaskServer {
             String method = exchange.getRequestMethod();
 
             switch (method) {
-                case "GET":
+                case GET:
                     processGet(exchange, TypeOfTask.SUB);
                     break;
-                case "POST":
+                case POST:
                     processPost(exchange, TypeOfTask.SUB);
                     break;
-                case "DELETE":
+                case DELETE:
                     processDelete(exchange, TypeOfTask.SUB);
                     break;
                 default:
@@ -299,13 +311,13 @@ public class HttpTaskServer {
             String method = exchange.getRequestMethod();
 
             switch (method) {
-                case "GET":
+                case GET:
                     processGet(exchange, TypeOfTask.EPIC);
                     break;
-                case "POST":
+                case POST:
                     processPost(exchange, TypeOfTask.EPIC);
                     break;
-                case "DELETE":
+                case DELETE:
                     processDelete(exchange, TypeOfTask.EPIC);
                     break;
                 default:
@@ -321,25 +333,21 @@ public class HttpTaskServer {
             String query = exchange.getRequestURI().getQuery();
             String path = exchange.getRequestURI().getPath();
 
-            switch (method) {
-                case "GET":
-                    if (query != null) {
-                        sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-                        break;
-                    }
-                    if (!Pattern.matches("^/tasks/history/?", path)) {
-                        sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-                        break;
-                    }
-                    String response = gson.toJson(taskManager.getHistory());
-                    sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
-                    break;
-                default:
+            if (method.equals(GET)) {
+                if (query != null) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
+                }
+                if (!Pattern.matches("^/tasks/history/?", path)) {
+                    sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
+                }
+                String response = gson.toJson(taskManager.getHistory());
+                sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
 
-            }
+            } else sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
         }
+
     }
+
 
     static class TasksHandler implements HttpHandler {
         @Override
@@ -348,28 +356,23 @@ public class HttpTaskServer {
             String query = exchange.getRequestURI().getQuery();
             String path = exchange.getRequestURI().getPath();
 
-            switch (method) {
-                case "GET":
-                    if (query != null) {
-                        sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-                        break;
-                    }
-                    if (!Pattern.matches("^/tasks/?", path)) {
-                        sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-                        break;
-                    }
-                    String response = gson.toJson(taskManager.getPrioritizedTasks());
-                    sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
-                    break;
-                default:
+            if (method.equals(GET)) {
+                if (query != null) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
+                }
+                if (!Pattern.matches("^/tasks/?", path)) {
+                    sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
+                }
+                String response = gson.toJson(taskManager.getPrioritizedTasks());
+                sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+            } else sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
 
-            }
         }
     }
-
-
 }
+
+
+
 
 
 
