@@ -9,9 +9,3 @@ I
 test/resources/empty_task,7\0\7029ee3491fc7442de676f54a188447ece57c8a2
 I
 test/resources/no_history,e\2\e2b26cfe188f7ca7df637eaaed5f43dd79885b40
-E
-test/resources/no_sub,1\8\18f8ae74df18524479e9dd4d450ff33c8de48086
-M
-test/task/SimpleTaskTest.java,b\b\bb148bbe1c460e67b7690ecc8c587aaaa8f037d3
-J
-test/task/SubTaskTest.java,d\2\d28b9394cbccb25b6e21e17550ca52b3b0c3bb27

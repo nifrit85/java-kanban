@@ -6,7 +6,10 @@ import task.SimpleTask;
 import task.SubTask;
 import task.Task;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface TaskManager {
     Comparator<Task> taskComparator = (t1, t2) -> {
@@ -65,6 +68,4 @@ public interface TaskManager {
     void deleteSubTaskByID(int id);
 
     void deleteEpicTaskByID(int id);
-
-
 }

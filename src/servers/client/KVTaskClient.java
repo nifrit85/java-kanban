@@ -43,8 +43,5 @@ public class KVTaskClient {
             body = response.body();
         }
         return body;
-
-
     }
-
 }

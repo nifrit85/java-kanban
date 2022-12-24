@@ -1,7 +1,8 @@
 package task;
 
-import constant.Status;
-import constant.TypeOfTask;
+import constants.Constants;
+import constants.Status;
+import constants.TypeOfTask;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,13 +11,9 @@ import java.util.List;
 
 public class EpicTask extends Task {
     ArrayList<Integer> subTaskIDs = new ArrayList<>();
-
     LocalDateTime endTime;
 
-    private static final String NOT_AVAILABLE = "NaN";
-
     public EpicTask(String name, String description, Status status) {
-
         super(name, description, status, null, null);
     }
 
@@ -44,16 +41,16 @@ public class EpicTask extends Task {
     @Override
     public String toString() {
         String stringStartTime;
-        if (startTime == null) stringStartTime = NOT_AVAILABLE;
-        else stringStartTime = startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss"));
+        if (startTime == null) stringStartTime = Constants.NOT_AVAILABLE;
+        else stringStartTime = startTime.format(DateTimeFormatter.ofPattern(Constants.LOCAL_DATE_TIME_FORMAT));
 
         String stringDuration;
-        if (duration == null) stringDuration = NOT_AVAILABLE;
+        if (duration == null) stringDuration = Constants.NOT_AVAILABLE;
         else stringDuration = duration.toMinutes() + " minutes";
 
         String stringEndTime;
-        if (endTime == null) stringEndTime = NOT_AVAILABLE;
-        else stringEndTime = endTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss"));
+        if (endTime == null) stringEndTime = Constants.NOT_AVAILABLE;
+        else stringEndTime = endTime.format(DateTimeFormatter.ofPattern(Constants.LOCAL_DATE_TIME_FORMAT));
 
 
         return "Epic{" + "Id=" + id + ", name='" + name + "' " + ", description='" + description + "' " + ", status=" + status + ", startTime = " + stringStartTime + ", duration = " + stringDuration + ", endTime = " + stringEndTime + ", subTaskIDs=" + subTaskIDs.toString() + "}" + System.lineSeparator();
@@ -77,5 +74,4 @@ public class EpicTask extends Task {
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
-
 }

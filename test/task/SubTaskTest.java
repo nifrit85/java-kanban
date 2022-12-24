@@ -1,6 +1,6 @@
 package task;
 
-import constant.TypeOfTask;
+import constants.TypeOfTask;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,5 +26,4 @@ class SubTaskTest extends TaskTest {
         //Тестируем получение типа саба
         assertEquals(TypeOfTask.SUB, subTask.getTaskType());
     }
-
 }

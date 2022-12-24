@@ -1,15 +1,13 @@
 package task;
 
-import constant.Status;
-import constant.TypeOfManager;
-import exceptions.IntersectionsException;
+import constants.Status;
+import constants.TypeOfManager;
 import managers.Managers;
 import managers.interfaces.TaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -26,32 +24,22 @@ class TaskTest {
         //Наполняем менеджер идентичным состоянием перед каждым тестом
         //Один Эпик
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTaskToAdd, null);
-        } catch (IntersectionsException e) {
-        }
+        manager.addTask(epicTaskToAdd, null);
+
         //Три сабтаска для эпика
-        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
-        }
-        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 00), Duration.ofHours(20));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
-        }
-        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
-        }
+        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
+
+        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 0), Duration.ofHours(20));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
+
+        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 0), Duration.ofHours(30));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
+
         //Один Симпл
-        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(30));
-        try {
-            manager.addTask(simpleTaskToAdd, null);
-        } catch (IntersectionsException e) {
-        }
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(30));
+        manager.addTask(simpleTaskToAdd, null);
+
         epicTask = (EpicTask) manager.getTaskById(1);
         subTask = (SubTask) manager.getTaskById(2);
         simpleTask = (SimpleTask) manager.getTaskById(5);
@@ -97,15 +85,14 @@ class TaskTest {
     @Test
     void shouldBeEndTime2022_12_12_00_40_00() {
         //Тестируем расчёт времени окончания таска
-        LocalDateTime endTime = LocalDateTime.of(2022, 12, 11, 14, 40, 00).plusHours(10);
+        LocalDateTime endTime = LocalDateTime.of(2022, 12, 11, 14, 40, 0).plusHours(10);
         assertEquals(endTime, subTask.getEndTime());
     }
 
     @Test
     void shouldBeStartTime2022_12_11_14_40_00() {
         //Тестируем получение времени начала таска
-        LocalDateTime startTime = LocalDateTime.of(2022, 12, 11, 14, 40, 00);
+        LocalDateTime startTime = LocalDateTime.of(2022, 12, 11, 14, 40, 0);
         assertEquals(startTime, subTask.getStartTime());
     }
-
 }

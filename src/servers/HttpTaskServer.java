@@ -1,17 +1,19 @@
 package servers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import constant.TypeOfTask;
+import constants.Constants;
+import constants.TypeOfMethods;
+import constants.TypeOfTask;
 import exceptions.IntersectionsException;
 import managers.interfaces.TaskManager;
 import task.EpicTask;
 import task.SimpleTask;
 import task.SubTask;
 import task.Task;
+import utilities.MyGsonBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,31 +29,22 @@ public class HttpTaskServer {
 
     private static final int PORT = 8080;
 
-    private static TaskManager taskManager;
+    private final TaskManager taskManager;
 
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private final Gson gson = MyGsonBuilder.create();
 
-    public static final String JSON = "application/json";
-    private static final String TEXT = "text/plain";
-
-    private static final String GOOD_PATTERN = "^/tasks/?(task/?|epic/?|subtask/?)*";
-
-    private static final String GET = "GET";
-    private static final String POST = "POST";
-    private static final String DELETE = "DELETE";
-
-    private HttpServer server;
+    private final HttpServer server;
 
 
     public HttpTaskServer(TaskManager manager) throws IOException {
         taskManager = manager;
         server = HttpServer.create();
         server.bind(new InetSocketAddress(PORT), 0);
-        server.createContext("/tasks/task", new SimpleTaskHandler());
-        server.createContext("/tasks/subtask", new SubTaskHandler());
-        server.createContext("/tasks/epic", new EpicTaskHandler());
-        server.createContext("/tasks/history", new HistoryHandler());
-        server.createContext("/tasks", new TasksHandler());
+        server.createContext(Constants.PATH_SIMPLE, new SimpleTaskHandler());
+        server.createContext(Constants.PATH_SUB, new SubTaskHandler());
+        server.createContext(Constants.PATH_EPIC, new EpicTaskHandler());
+        server.createContext(Constants.PATH_HISTORY, new HistoryHandler());
+        server.createContext(Constants.PATH_TASKS, new TasksHandler());
     }
 
     public void start() {
@@ -62,11 +55,11 @@ public class HttpTaskServer {
         server.stop(0);
     }
 
-    static void sendResponse(HttpExchange exchange, String contentType, String response, int rCode) throws IOException {
+    public static void sendResponse(HttpExchange exchange, String contentType, String response, int rCode) throws IOException {
         byte[] bytes = null;
         int length = 0;
         if (contentType != null) {
-            exchange.getResponseHeaders().add("Content-Type", contentType);
+            exchange.getResponseHeaders().add(Constants.CONTENT_TYPE, contentType);
         }
         if (response != null) {
             bytes = response.getBytes(DEFAULT_CHARSET);
@@ -83,11 +76,11 @@ public class HttpTaskServer {
         exchange.close();
     }
 
-    private static void processGet(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private void processGet(HttpExchange exchange, TypeOfTask type) throws IOException {
         String query = exchange.getRequestURI().getQuery();
         String path = exchange.getRequestURI().getPath();
         //Исключим неверные обращения
-        if (!Pattern.matches(GOOD_PATTERN, path)) {
+        if (!Pattern.matches(Constants.GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -105,9 +98,9 @@ public class HttpTaskServer {
                     response = gson.toJson(taskManager.getEpicTasks());
                     break;
             }
-            sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+            sendResponse(exchange, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
 
-        } else if (query.startsWith("id=") && Pattern.matches("^/tasks/(task|epic|subtask)/$", path)) {
+        } else if (query.startsWith(Constants.ID_PATTERN) && Pattern.matches(Constants.GOOD_PATTERN_FOR_ID, path)) {
             id = Integer.parseInt(query.substring(3));
             Task task = taskManager.getTaskById(id);
             if (task == null) {
@@ -116,12 +109,12 @@ public class HttpTaskServer {
             }
             if (task.getTaskType() == type) {
                 response = gson.toJson(task);
-                sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+                sendResponse(exchange, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
             } else { //Запросили тип задачи не из того Эндпоинта
                 sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             }
             //Отдельная обработка Эпика для подзадачи
-        } else if (query.startsWith("id=") && path.equals("/tasks/subtask/epic/")) {
+        } else if (query.startsWith(Constants.ID_PATTERN) && path.equals("/tasks/subtask/epic/")) {
             id = Integer.parseInt(query.substring(3));
             Task epicTask = taskManager.getTaskById(id);
             if (epicTask == null || epicTask.getTaskType() != TypeOfTask.EPIC) {
@@ -130,19 +123,19 @@ public class HttpTaskServer {
             }
             Map<Integer, SubTask> subTaskFromEpic = taskManager.getSubTaskFromEpic((EpicTask) epicTask);
             response = gson.toJson(subTaskFromEpic);
-            sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+            sendResponse(exchange, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
         } else {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
         }
     }
 
-    private static void processPost(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private void processPost(HttpExchange exchange, TypeOfTask type) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
         String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
         boolean isNotFound = false;
         String path = exchange.getRequestURI().getPath();
         //Исключим неверные обращения
-        if (!Pattern.matches(GOOD_PATTERN, path)) {
+        if (!Pattern.matches(Constants.GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -163,7 +156,7 @@ public class HttpTaskServer {
                         sendResponse(exchange, null, null, HttpURLConnection.HTTP_OK);
                         return;
                     } catch (IntersectionsException e) {
-                        sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
+                        sendResponse(exchange, Constants.CONTENT_TYPE_TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
                 } else isNotFound = true;
@@ -182,7 +175,7 @@ public class HttpTaskServer {
                         sendResponse(exchange, null, null, HttpURLConnection.HTTP_OK);
                         return;
                     } catch (IntersectionsException e) {
-                        sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
+                        sendResponse(exchange, Constants.CONTENT_TYPE_TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
                 } else isNotFound = true;
@@ -201,7 +194,7 @@ public class HttpTaskServer {
                         sendResponse(exchange, null, null, HttpURLConnection.HTTP_OK);
                         return;
                     } catch (IntersectionsException e) {
-                        sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
+                        sendResponse(exchange, Constants.CONTENT_TYPE_TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
                         return;
                     }
                 } else isNotFound = true;
@@ -218,15 +211,15 @@ public class HttpTaskServer {
                 taskManager.addTask(task, null);
                 sendResponse(exchange, null, null, HttpURLConnection.HTTP_OK);
             } catch (IntersectionsException e) {
-                sendResponse(exchange, TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
+                sendResponse(exchange, Constants.CONTENT_TYPE_TEXT, e.getMessage(), HttpURLConnection.HTTP_CONFLICT);
             }
         }
     }
 
-    private static void processDelete(HttpExchange exchange, TypeOfTask type) throws IOException {
+    private void processDelete(HttpExchange exchange, TypeOfTask type) throws IOException {
         String query = exchange.getRequestURI().getQuery();
         String path = exchange.getRequestURI().getPath();
-        if (!Pattern.matches(GOOD_PATTERN, path)) {
+        if (!Pattern.matches(Constants.GOOD_PATTERN, path)) {
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
             return;
         }
@@ -243,7 +236,7 @@ public class HttpTaskServer {
                     break;
             }
             sendResponse(exchange, null, null, HttpURLConnection.HTTP_OK);
-        } else if (query.startsWith("id=")) {
+        } else if (query.startsWith(Constants.ID_PATTERN)) {
             int id = Integer.parseInt(query.substring(3));
             switch (type) {
                 case SIMPLE:
@@ -262,12 +255,11 @@ public class HttpTaskServer {
         }
     }
 
-    static class SimpleTaskHandler implements HttpHandler {
+    class SimpleTaskHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
-
-            switch (method) {
+            switch (TypeOfMethods.valueOf(method)) {
                 case GET:
                     processGet(exchange, TypeOfTask.SIMPLE);
                     break;
@@ -279,17 +271,16 @@ public class HttpTaskServer {
                     break;
                 default:
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-
             }
         }
     }
 
-    static class SubTaskHandler implements HttpHandler {
+    class SubTaskHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
 
-            switch (method) {
+            switch (TypeOfMethods.valueOf(method)) {
                 case GET:
                     processGet(exchange, TypeOfTask.SUB);
                     break;
@@ -305,12 +296,12 @@ public class HttpTaskServer {
         }
     }
 
-    static class EpicTaskHandler implements HttpHandler {
+    class EpicTaskHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
 
-            switch (method) {
+            switch (TypeOfMethods.valueOf(method)) {
                 case GET:
                     processGet(exchange, TypeOfTask.EPIC);
                     break;
@@ -326,47 +317,45 @@ public class HttpTaskServer {
         }
     }
 
-    static class HistoryHandler implements HttpHandler {
+    class HistoryHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
             String query = exchange.getRequestURI().getQuery();
             String path = exchange.getRequestURI().getPath();
 
-            if (method.equals(GET)) {
+            if (TypeOfMethods.valueOf(method) == TypeOfMethods.GET) {
                 if (query != null) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
                 }
-                if (!Pattern.matches("^/tasks/history/?", path)) {
+                if (!Pattern.matches(Constants.HISTORY_PATTERN, path)) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
                 }
                 String response = gson.toJson(taskManager.getHistory());
-                sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+                sendResponse(exchange, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
 
             } else sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
         }
-
     }
 
 
-    static class TasksHandler implements HttpHandler {
+    class TasksHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
             String query = exchange.getRequestURI().getQuery();
             String path = exchange.getRequestURI().getPath();
 
-            if (method.equals(GET)) {
+            if (TypeOfMethods.valueOf(method) == TypeOfMethods.GET) {
                 if (query != null) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
                 }
-                if (!Pattern.matches("^/tasks/?", path)) {
+                if (!Pattern.matches(Constants.TASKS_PATTERN, path)) {
                     sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
                 }
                 String response = gson.toJson(taskManager.getPrioritizedTasks());
-                sendResponse(exchange, JSON, response, HttpURLConnection.HTTP_OK);
+                sendResponse(exchange, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
             } else sendResponse(exchange, null, null, HttpURLConnection.HTTP_BAD_REQUEST);
-
         }
     }
 }

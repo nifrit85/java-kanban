@@ -1,4 +1,4 @@
-package constant;
+package constants;
 
 public enum TypeOfManager {
     FILE, MEMORY, HTTP

@@ -1,7 +1,7 @@
 package managers;
 
-import constant.Status;
-import constant.TypeOfTask;
+import constants.Status;
+import constants.TypeOfTask;
 import exceptions.IntersectionsException;
 import managers.interfaces.HistoryManager;
 import managers.interfaces.TaskManager;
@@ -13,6 +13,7 @@ import task.Task;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -92,28 +93,38 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) throws IntersectionsException {
+        boolean isAdded = false;
         if (task != null) {
             switch (task.getTaskType()) {
                 case EPIC:
-                    updateEpicTask((EpicTask) task);
+                    try {
+                        isAdded = updateEpicTask((EpicTask) task);
+                    } catch (IntersectionsException e) {
+                        log.log(Level.WARNING, e.getMessage());
+                    }
                     break;
                 case SUB:
                     try {
-                        updateSubTask((SubTask) task);
+                        isAdded = updateSubTask((SubTask) task);
                     } catch (IntersectionsException e) {
                         EpicTask parent = (EpicTask) getTaskByIdInternalUse(((SubTask) task).getParentID());
                         if (parent != null) {
                             parent.delSubTask((SubTask) task);
                         }
-                        throw new IntersectionsException(task.getId());
+                        log.log(Level.WARNING, e.getMessage());
                     }
                     break;
                 case SIMPLE:
-                    updateSimpleTask((SimpleTask) task);
-
+                    try {
+                        isAdded = updateSimpleTask((SimpleTask) task);
+                    } catch (IntersectionsException e) {
+                        log.log(Level.WARNING, e.getMessage());
+                    }
             }
-            prioritizedTasks.removeIf(t -> t.getId() == task.getId());
-            prioritizedTasks.add(task);
+            if (isAdded) {
+                prioritizedTasks.removeIf(t -> t.getId() == task.getId());
+                prioritizedTasks.add(task);
+            }
 
         }
     }
@@ -216,26 +227,27 @@ public class InMemoryTaskManager implements TaskManager {
         prioritizedTasks.removeIf(task -> task.getId() == id);
     }
 
-    private void updateSimpleTask(SimpleTask simpleTask) throws IntersectionsException {
+    private boolean updateSimpleTask(SimpleTask simpleTask) throws IntersectionsException {
         checkIntersections(simpleTask);
         simpleTasks.put(simpleTask.getId(), simpleTask);
+        return true;
     }
 
-    private void updateSubTask(SubTask subTask) throws IntersectionsException {
+    private boolean updateSubTask(SubTask subTask) throws IntersectionsException {
         checkIntersections(subTask);
         subTasks.put(subTask.getId(), subTask);
         int parentID = subTask.getParentID();
         EpicTask parent = (EpicTask) getTaskByIdInternalUse(parentID);
         if (parent != null) updateEpicTask(parent);
-
-
+        return true;
     }
 
-    private void updateEpicTask(EpicTask epicTask) {
+    private boolean updateEpicTask(EpicTask epicTask) {
         Status status = getNewEpicStatus(epicTask);
         epicTask.setStatus(status);
         calculateNewEndTimeForEpicTask(epicTask);
         epicTasks.put(epicTask.getId(), epicTask);
+        return true;
     }
 
     private Status getNewEpicStatus(EpicTask parent) {

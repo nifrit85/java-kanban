@@ -1,21 +1,19 @@
 package task;
 
-import constant.Status;
-import constant.TypeOfTask;
+import constants.Constants;
+import constants.Status;
+import constants.TypeOfTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 public abstract class Task {
-
-    private static final String NOT_AVAILABLE = "NaN";
     int id;
     String name;
     String description;
     Status status;
     LocalDateTime startTime;
     Duration duration;
-
 
     public String getName() {
         return name;
@@ -63,11 +61,11 @@ public abstract class Task {
 
     public String stringForFile() {
         String stringStartTime;
-        if (startTime == null) stringStartTime = NOT_AVAILABLE;
+        if (startTime == null) stringStartTime = Constants.NOT_AVAILABLE;
         else stringStartTime = getStartTime().toString();
 
         String stringDuration;
-        if (duration == null) stringDuration = NOT_AVAILABLE;
+        if (duration == null) stringDuration = Constants.NOT_AVAILABLE;
         else stringDuration = getDuration().toString();
 
         return id + "," + getTaskType().toString() + "," + getName() + "," + getStatus().toString() + "," + getDescription() + "," + stringStartTime + "," + stringDuration;

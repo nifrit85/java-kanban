@@ -1,22 +1,23 @@
 package managers;
 
-import constant.Status;
-import constant.TypeOfTask;
+import constants.Constants;
+import constants.Status;
+import constants.TypeOfTask;
 import exceptions.IntersectionsException;
 import managers.interfaces.TaskManager;
-import task.*;
+import task.EpicTask;
+import task.SimpleTask;
+import task.SubTask;
+import task.Task;
 
 import java.io.*;
-import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Level;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
-
-    private static final String NOT_AVAILABLE = "NaN";
-    String pathToFile;
+    private String pathToFile;
 
     public FileBackedTasksManager(String pathToFile) {
         this.pathToFile = pathToFile;
@@ -27,8 +28,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
-    public FileBackedTasksManager(URI path) {
-        this.pathToFile = path.toString();
+    public FileBackedTasksManager() {
     }
 
     @Override
@@ -99,8 +99,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             saveHistoryToFile(bufferedWriter);
 
         } catch (IOException e) {
-            log.log(Level.WARNING, "Не удалось записать данные в файл");
-
+            log.log(Level.WARNING, Constants.FILE_WRITE_ERROR);
         }
     }
 
@@ -196,7 +195,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             Status status = Status.valueOf(lineOfTask[3]);
             String description = lineOfTask[4];
             LocalDateTime startTime = null;
-            if (!lineOfTask[5].equals(NOT_AVAILABLE)) startTime = LocalDateTime.parse(lineOfTask[5]);
+            if (!lineOfTask[5].equals(Constants.NOT_AVAILABLE)) startTime = LocalDateTime.parse(lineOfTask[5]);
 
             Duration duration = Duration.parse(lineOfTask[6]);
 
@@ -294,6 +293,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         } catch (IntersectionsException e) {
             log.log(Level.WARNING, e.getMessage());
         }
-
     }
 }

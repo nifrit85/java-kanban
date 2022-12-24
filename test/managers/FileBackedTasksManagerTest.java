@@ -1,36 +1,28 @@
 package managers;
 
+import constants.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import task.EpicTask;
 import task.SimpleTask;
 import task.SubTask;
+import test_constants.ConstantsForTests;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
-    private static final String COMMON_FILE = "./test/resources/test";
-    private static final String EMPTY_TASK_FILE = "./test/resources/empty_task";
-    private static final String NO_SUBTASK_FILE = "./test/resources/no_sub";
-    private static final String NO_HISTORY_FILE = "./test/resources/no_history";
-
-    private static final String COMMON_EXAMPLE = "./test/resources/example/test";
-    private static final String EMPTY_TASK_EXAMPLE = "./test/resources/example/empty_task";
-    private static final String NO_SUBTASK_EXAMPLE = "./test/resources/example/no_sub";
-    private static final String NO_HISTORY_EXAMPLE = "./test/resources/example/no_history";
-
-
     @Override
     public FileBackedTasksManager getManager() {
-        File file = new File(COMMON_FILE);
-        File original = new File(COMMON_EXAMPLE);
+        File file = new File(ConstantsForTests.COMMON_FILE);
+        File original = new File(ConstantsForTests.COMMON_EXAMPLE);
         file.delete();
         try {
             Files.copy(original.toPath(), file.toPath());
@@ -39,7 +31,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         }
 
 
-        return new FileBackedTasksManager(COMMON_FILE);
+        return new FileBackedTasksManager(ConstantsForTests.COMMON_FILE);
     }
 
     @Override
@@ -59,15 +51,15 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void shouldBeEmptyTasks() {
         //Загружаем файл, в котором нет тасков, но есть история
-        File file = new File(EMPTY_TASK_FILE);
-        File original = new File(EMPTY_TASK_EXAMPLE);
+        File file = new File(ConstantsForTests.EMPTY_TASK_FILE);
+        File original = new File(ConstantsForTests.EMPTY_TASK_EXAMPLE);
         file.delete();
         try {
             Files.copy(original.toPath(), file.toPath());
         } catch (IOException e) {
             e.fillInStackTrace();
         }
-        FileBackedTasksManager managerToTest = new FileBackedTasksManager(EMPTY_TASK_FILE);
+        FileBackedTasksManager managerToTest = new FileBackedTasksManager(ConstantsForTests.EMPTY_TASK_FILE);
         //Проверим, что таски не загрузились
         assertTrue(managerToTest.getTasks().isEmpty());
         //Проверим что история не загрузилась, так как нет тасков
@@ -78,15 +70,15 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void shouldBeEmptyEpic() {
         //Загружаем файл, в котором у эпика нет подзадач
-        File file = new File(NO_SUBTASK_FILE);
-        File original = new File(NO_SUBTASK_EXAMPLE);
+        File file = new File(ConstantsForTests.NO_SUBTASK_FILE);
+        File original = new File(ConstantsForTests.NO_SUBTASK_EXAMPLE);
         file.delete();
         try {
             Files.copy(original.toPath(), file.toPath());
         } catch (IOException e) {
             e.fillInStackTrace();
         }
-        FileBackedTasksManager managerToTest = new FileBackedTasksManager(NO_SUBTASK_FILE);
+        FileBackedTasksManager managerToTest = new FileBackedTasksManager(ConstantsForTests.NO_SUBTASK_FILE);
 
         epicTask = (EpicTask) managerToTest.getTaskById(2);
 
@@ -101,19 +93,67 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void shouldBeEmptyHistory() {
         //Загружаем файл, в котором нет истории
-        File file = new File(NO_HISTORY_FILE);
-        File original = new File(NO_HISTORY_EXAMPLE);
+        File file = new File(ConstantsForTests.NO_HISTORY_FILE);
+        File original = new File(ConstantsForTests.NO_HISTORY_EXAMPLE);
         file.delete();
         try {
             Files.copy(original.toPath(), file.toPath());
         } catch (IOException e) {
             e.fillInStackTrace();
         }
-        FileBackedTasksManager managerToTest = new FileBackedTasksManager(NO_HISTORY_FILE);
+        FileBackedTasksManager managerToTest = new FileBackedTasksManager(ConstantsForTests.NO_HISTORY_FILE);
 
         //Проверим, что таски загрузились
         assertFalse(managerToTest.getTasks().isEmpty());
         //Проверим, что история пустая
         assertTrue(managerToTest.getHistory().isEmpty());
+    }
+
+    @Test
+    void checkReadFromFile() {
+        //Тестируем запись в файл
+        //Очистим всё
+        manager.clearTasks();
+        //Убедимся что всё чисто
+        assertTrue(manager.getTasks().isEmpty());
+        assertTrue(manager.getHistory().isEmpty());
+        assertTrue(manager.getPrioritizedTasks().isEmpty());
+        //Добавим по одной задаче
+        //Один Симпл
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTaskToAdd, null);
+
+        //Один Эпик
+        EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
+        manager.addTask(epicTaskToAdd, null);
+
+        //Один саб для эпика
+        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
+
+        //Эпик без саба
+        epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
+        manager.addTask(epicTaskToAdd, null);
+
+        //Наполним историей
+        manager.getTaskById(3);
+        manager.getTaskById(1);
+        manager.getTaskById(2);
+
+        //Создадим новый менеджер из этого файла
+        FileBackedTasksManager managerToTest = new FileBackedTasksManager(ConstantsForTests.COMMON_FILE);
+        //Сверим содержимое
+        //Все задачи
+        assertEquals(manager.getTasks().toString(), managerToTest.getTasks().toString());
+        //Симплы
+        assertEquals(manager.getSimpleTasks().toString(), managerToTest.getSimpleTasks().toString());
+        //Епики
+        assertEquals(manager.getEpicTasks().toString(), managerToTest.getEpicTasks().toString());
+        //Сабы
+        assertEquals(manager.getSubTasks().toString(), managerToTest.getSubTasks().toString());
+        //История
+        assertEquals(manager.getHistory().toString(), managerToTest.getHistory().toString());
+        //Приоритеты
+        assertEquals(manager.getPrioritizedTasks().toString(), managerToTest.getPrioritizedTasks().toString());
     }
 }

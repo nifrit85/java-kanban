@@ -1,7 +1,8 @@
 package task;
 
-import constant.Status;
-import constant.TypeOfTask;
+import constants.Constants;
+import constants.Status;
+import constants.TypeOfTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public class SimpleTask extends Task {
     @Override
     public String toString() {
 
-        return "Simple{" + "Id= " + id + ", name= '" + name + "' " + ", description= '" + description + "' " + ", status= " + status + "}" + ", startTime = " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss")) + ", duration = " + duration.toMinutes() + " minutes" + ", endTime = " + getEndTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss")) + System.lineSeparator();
+        return "Simple{" + "Id= " + id + ", name= '" + name + "' " + ", description= '" + description + "' " + ", status= " + status + "}" + ", startTime = " + startTime.format(DateTimeFormatter.ofPattern(Constants.LOCAL_DATE_TIME_FORMAT)) + ", duration = " + duration.toMinutes() + " minutes" + ", endTime = " + getEndTime().format(DateTimeFormatter.ofPattern(Constants.LOCAL_DATE_TIME_FORMAT)) + System.lineSeparator();
     }
 
     @Override

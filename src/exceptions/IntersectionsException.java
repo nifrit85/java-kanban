@@ -1,7 +1,9 @@
 package exceptions;
 
-public class IntersectionsException extends Exception {
+import constants.Constants;
+
+public class IntersectionsException extends RuntimeException {
     public IntersectionsException(int id) {
-        super("Новая задача пересекается по времени выполнения с задачей номер " + id);
+        super(Constants.INTERSECTION_MESSAGE + id);
     }
 }

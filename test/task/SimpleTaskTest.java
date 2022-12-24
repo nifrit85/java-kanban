@@ -1,6 +1,6 @@
 package task;
 
-import constant.TypeOfTask;
+import constants.TypeOfTask;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

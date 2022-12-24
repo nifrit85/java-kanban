@@ -1,10 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import constant.Status;
-import exceptions.IntersectionsException;
+import constants.Constants;
+import constants.Status;
 import managers.InMemoryTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +12,7 @@ import servers.HttpTaskServer;
 import task.EpicTask;
 import task.SimpleTask;
 import task.SubTask;
+import utilities.MyGsonBuilder;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -31,8 +31,7 @@ class HttpTaskServerTest {
     private HttpTaskServer server;
     private InMemoryTaskManager manager;
     private final HttpClient client = HttpClient.newHttpClient();
-
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    private final Gson gson = MyGsonBuilder.create();
 
     @BeforeEach
     void BeforeEach() {
@@ -41,50 +40,31 @@ class HttpTaskServerTest {
             server = new HttpTaskServer(manager);
             server.start();
         } catch (IOException e) {
-            e.getMessage();
+            System.out.println(e.getMessage());
         }
         //Один Симпл
-        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(simpleTaskToAdd, null);
-        } catch (IntersectionsException e) {
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTaskToAdd, null);
 
-        }
 
         //Один Эпик
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTaskToAdd, null);
-        } catch (IntersectionsException e) {
+        manager.addTask(epicTaskToAdd, null);
 
-        }
 
         //Три сабтаска для эпика
-        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
-        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 00), Duration.ofHours(20));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 0), Duration.ofHours(20));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
-        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 0), Duration.ofHours(30));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
         //Один Эпик без подзадач
         epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTaskToAdd, null);
-        } catch (IntersectionsException e) {
-
-        }
+        manager.addTask(epicTaskToAdd, null);
 
         //Наполняем историю 1,4
         manager.getTaskById(1);
@@ -112,7 +92,6 @@ class HttpTaskServerTest {
         for (Map.Entry<Integer, SimpleTask> task : manager.getSimpleTasks().entrySet()) {
             assertTrue(simpleTasks.containsKey(task.getKey()));
         }
-
 
         //Добавим слеш в конце
         uri = URI.create("http://localhost:8080/tasks/task/");
@@ -188,11 +167,10 @@ class HttpTaskServerTest {
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
 
         uri = URI.create("http://localhost:8080/tasks/subtask1");
-        request = HttpRequest.newBuilder().uri(uri).PUT(HttpRequest.BodyPublishers.noBody()).build();
+        request = HttpRequest.newBuilder().uri(uri).GET().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         //Проверим код ответа
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
-
 
         //Неверный метод
         uri = URI.create("http://localhost:8080/tasks/task");
@@ -212,7 +190,6 @@ class HttpTaskServerTest {
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         //Проверим код ответа
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
-
     }
 
     @Test
@@ -271,7 +248,6 @@ class HttpTaskServerTest {
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
 
         //Неверные ID
-
         uri = URI.create("http://localhost:8080/tasks/task/?id=99");
         request = HttpRequest.newBuilder().uri(uri).GET().build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -289,26 +265,21 @@ class HttpTaskServerTest {
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         //Проверим код ответа
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
-
     }
 
     @Test
     void checkPostGood() throws IOException, InterruptedException {
-
-        final String JSON = "application/json";
-        final String CONTENT = "Content-Type";
-
         manager.clearTasks();
         //Проверим что нет задач
         assertTrue(manager.getSimpleTasks().isEmpty());
 
         //Симпл
-        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(10));
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
         simpleTaskToAdd.setID(1);
         String body = gson.toJson(simpleTaskToAdd);
 
         URI uri = URI.create("http://localhost:8080/tasks/task");
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(CONTENT, JSON).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
@@ -322,7 +293,7 @@ class HttpTaskServerTest {
         body = gson.toJson(epicTaskToAdd);
 
         uri = URI.create("http://localhost:8080/tasks/epic");
-        request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(CONTENT, JSON).build();
+        request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
@@ -330,41 +301,36 @@ class HttpTaskServerTest {
         assertEquals(epicTaskToAdd.toString(), manager.getTaskById(2).toString());
 
         //Сабтаск
-        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
+        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 0), Duration.ofHours(10));
         subTaskToAdd.setID(3);
         subTaskToAdd.setParent(epicTaskToAdd.getId());
         body = gson.toJson(subTaskToAdd);
 
         uri = URI.create("http://localhost:8080/tasks/subtask");
-        request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(CONTENT, JSON).build();
+        request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         //Проверим соответствует ли наша задача той, что легла через POST
         assertEquals(subTaskToAdd.toString(), manager.getTaskById(3).toString());
-
     }
 
     @Test
     void checkPostBad() throws IOException, InterruptedException {
 
-        final String JSON = "application/json";
-        final String CONTENT = "Content-Type";
-
         //Проверим что задачи есть
         assertFalse(manager.getSimpleTasks().isEmpty());
 
         //Добавим симпл через POST Эпика
-        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(10));
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
         simpleTaskToAdd.setID(1);
         String body = gson.toJson(simpleTaskToAdd);
 
         URI uri = URI.create("http://localhost:8080/tasks/epic");
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(CONTENT, JSON).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).POST(HttpRequest.BodyPublishers.ofString(body)).header(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
-
     }
 
     @Test
@@ -390,7 +356,6 @@ class HttpTaskServerTest {
         //Проверим код ответа
         assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         assertNull(manager.getTaskById(3));
-
     }
 
     @Test
@@ -457,7 +422,6 @@ class HttpTaskServerTest {
         Map<Integer, SubTask> subTasks = gson.fromJson(response.body(), type);
 
         assertEquals(manager.getSubTaskFromEpic(epicTask).toString(), subTasks.toString());
-
     }
 
     @Test
@@ -469,5 +433,4 @@ class HttpTaskServerTest {
         //Проверим код ответа
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, response.statusCode());
     }
-
 }

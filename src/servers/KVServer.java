@@ -2,6 +2,7 @@ package servers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import constants.Constants;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -46,7 +47,7 @@ public class KVServer {
                     return;
                 }
                 String response = data.get(key);
-                HttpTaskServer.sendResponse(h, HttpTaskServer.JSON, response, HttpURLConnection.HTTP_OK);
+                HttpTaskServer.sendResponse(h, Constants.CONTENT_TYPE_JSON, response, HttpURLConnection.HTTP_OK);
             } else {
                 HttpTaskServer.sendResponse(h, null, null, HttpURLConnection.HTTP_BAD_METHOD);
             }
@@ -128,7 +129,7 @@ public class KVServer {
 
     protected void sendText(HttpExchange h, String text) throws IOException {
         byte[] resp = text.getBytes(UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json");
+        h.getResponseHeaders().add("Content-Type", Constants.CONTENT_TYPE_JSON);
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
     }

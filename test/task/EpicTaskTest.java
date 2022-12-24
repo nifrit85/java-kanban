@@ -1,8 +1,7 @@
 package task;
 
-import constant.Status;
-import constant.TypeOfTask;
-import exceptions.IntersectionsException;
+import constants.Status;
+import constants.TypeOfTask;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -16,12 +15,8 @@ class EpicTaskTest extends TaskTest {
     @Test
     void shouldBeFourSubTask() {
         //Тестируем добавление Саба к Эпику
-        SubTask subTaskNew = new SubTask("Name4", "Descr4", Status.NEW, LocalDateTime.of(2022, 11, 18, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(subTaskNew, epicTask);
-        }catch (IntersectionsException e){
-
-        }
+        SubTask subTaskNew = new SubTask("Name4", "Descr4", Status.NEW, LocalDateTime.of(2022, 11, 18, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(subTaskNew, epicTask);
 
         assertEquals(4, epicTask.subTaskIDs.size());
     }

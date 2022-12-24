@@ -1,7 +1,6 @@
 package managers;
 
-import constant.Status;
-import exceptions.IntersectionsException;
+import constants.Status;
 import managers.interfaces.TaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +9,7 @@ import task.EpicTask;
 import task.SimpleTask;
 import task.SubTask;
 import task.Task;
+import test_constants.ConstantsForTests;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -22,8 +22,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     protected T manager;
 
     public abstract T getManager();
-
-    private static final int ID_NOT_EXIST = 99;
 
     protected EpicTask epicTask;
     protected SubTask subTaskOne;
@@ -38,48 +36,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager = getManager();
         //Наполняем менеджер идентичным состоянием перед каждым тестом
         //Один Симпл
-        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(simpleTaskToAdd, null);
-        } catch (IntersectionsException e) {
-
-        }
+        SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTaskToAdd, null);
 
         //Один Эпик
         EpicTask epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTaskToAdd, null);
-        } catch (IntersectionsException e) {
-
-        }
+        manager.addTask(epicTaskToAdd, null);
 
         //Три сабтаска для эпика
-        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        SubTask subTaskToAdd = new SubTask("NameSub1", "DescriptionSub1", Status.NEW, LocalDateTime.of(2022, 12, 11, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
-        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 00), Duration.ofHours(20));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        subTaskToAdd = new SubTask("NameSub2", "DescriptionSub2", Status.NEW, LocalDateTime.of(2022, 12, 13, 14, 40, 0), Duration.ofHours(20));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
-        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
-        try {
-            manager.addTask(subTaskToAdd, epicTaskToAdd);
-        } catch (IntersectionsException e) {
+        subTaskToAdd = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 0), Duration.ofHours(30));
+        manager.addTask(subTaskToAdd, epicTaskToAdd);
 
-        }
         //Один Эпик без подзадач
         epicTaskToAdd = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTaskToAdd, null);
-        } catch (IntersectionsException e) {
-
-        }
-
+        manager.addTask(epicTaskToAdd, null);
 
         epicTask = (EpicTask) manager.getTaskById(2);
         subTaskOne = (SubTask) manager.getTaskById(3);
@@ -107,21 +83,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(6, manager.getTasks().size());
 
         //Тестируем получение списка всех тасков при добавлении неверного таска
-        try {
-            manager.addTask(null, null);
-        } catch (IntersectionsException e) {
-
-        }
+        manager.addTask(null, null);
 
         assertEquals(6, manager.getTasks().size());
 
         //Тестируем удаление таска (добавили новый, удалили другой)
-        SimpleTask NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 01, 20, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(NewSimpleTask, null);
-        } catch (IntersectionsException e) {
+        SimpleTask NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 1, 20, 14, 40, 0), Duration.ofHours(10));
 
-        }
+        manager.addTask(NewSimpleTask, null);
 
         manager.deleteTaskByID(simpleTask.getId());
         assertEquals(6, manager.getTasks().size());
@@ -131,12 +100,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(6, manager.getTasks().size());
 
         //Тестируем добавление таска с пересечением по времени
-        NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 01, 20, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(NewSimpleTask, null);
-        } catch (IntersectionsException e) {
+        NewSimpleTask = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 1, 20, 14, 40, 0), Duration.ofHours(10));
 
-        }
+        manager.addTask(NewSimpleTask, null);
 
         assertEquals(6, manager.getPrioritizedTasks().size());
 
@@ -150,26 +116,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         //Тестируем добавление несуществующих сабов к Эпику
         EpicTask epicTask = new EpicTask("NameEpic", "DescriptionEpic", Status.NEW);
-        try {
-            manager.addTask(epicTask, null);
-        } catch (IntersectionsException e) {
 
-        }
-        try {
-            manager.addTask(null, epicTask);
-        } catch (IntersectionsException e) {
-
-        }
-        try {
-            manager.addTask(null, epicTask);
-        } catch (IntersectionsException e) {
-
-        }
-        try {
-            manager.addTask(null, epicTask);
-        } catch (IntersectionsException e) {
-
-        }
+        manager.addTask(epicTask, null);
+        manager.addTask(null, epicTask);
+        manager.addTask(null, epicTask);
+        manager.addTask(null, epicTask);
 
         assertEquals(0, manager.getSubTaskFromEpic(epicTask).size());
 
@@ -179,7 +130,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void shouldBeId2() {
-        //Тестируем удалени саба из эпика
+        //Тестируем удаление саба из эпика
         manager.deleteTaskByID(subTaskOne.getId());
         assertEquals(2, manager.getSubTaskFromEpic(epicTask).size());
 
@@ -190,7 +141,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void shouldBeNull() {
         //Тестируем получение несуществующего таска
-        assertNull(manager.getTaskById(ID_NOT_EXIST));
+        assertNull(manager.getTaskById(ConstantsForTests.ID_NOT_EXIST_99));
     }
 
     @Test
@@ -198,46 +149,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         //Тест сортировки по дате начала
         manager.clearTasks();
         //Добавляем 2 таска
-        SimpleTask simpleTask1 = new SimpleTask("NameSimple1", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2023, 12, 22, 14, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(simpleTask1, null);
-        } catch (IntersectionsException e) {
+        SimpleTask simpleTask1 = new SimpleTask("NameSimple1", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2023, 12, 22, 14, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTask1, null);
 
-        }
-
-
-        SimpleTask simpleTask2 = new SimpleTask("NameSimple2", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(simpleTask2, null);
-        } catch (IntersectionsException e) {
-
-        }
+        SimpleTask simpleTask2 = new SimpleTask("NameSimple2", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTask2, null);
 
         //Третий с пересечением по времени
-        SimpleTask simpleTaskBad = new SimpleTask("NameSimpleBad", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 00), Duration.ofHours(10));
-        try {
-            manager.addTask(simpleTaskBad, null);
-        } catch (IntersectionsException e) {
-
-        }
-
+        SimpleTask simpleTaskBad = new SimpleTask("NameSimpleBad", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 21, 15, 40, 0), Duration.ofHours(10));
+        manager.addTask(simpleTaskBad, null);
 
         //Проверяем что третий не попал и верный порядок сортировки
         Task[] prioritizedTasksTest = new Task[]{simpleTask2, simpleTask1};
         assertArrayEquals(prioritizedTasksTest, manager.getPrioritizedTasks().toArray());
-
     }
 
     @Test
     public void shouldBeThreeTask() {
-        //Добавляем  1 саб с пересечением по времени
-        SubTask subTaskNew = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 00), Duration.ofHours(30));
-        try {
-            manager.addTask(subTaskNew, epicTask);
-        } catch (IntersectionsException e) {
-
-        }
-
+        //Добавляем 1 саб с пересечением по времени
+        SubTask subTaskNew = new SubTask("NameSub3", "DescriptionSub3", Status.NEW, LocalDateTime.of(2022, 12, 15, 14, 40, 0), Duration.ofHours(30));
+        manager.addTask(subTaskNew, epicTask);
 
         //Проверяем что добавилось только он не добавился
         assertEquals(3, manager.getSubTaskFromEpic(epicTask).size());
@@ -273,57 +204,35 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldBeInProgressStatus() {
         //Тестируем, что при смене одного статуса саба на DONE, у Эпика будет IN_PROGRESS
         subTaskOne.setStatus(Status.DONE);
-        try {
-            manager.updateTask(subTaskOne);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskOne);
 
-        }
         assertEquals(Status.IN_PROGRESS, epicTask.getStatus());
 
-        //Тестируем что при установлке всех сабов в статус IN_PROGRESS, Эпик так же будет IN_PROGRESS
+        //Тестируем что при установке всех сабов в статус IN_PROGRESS, Эпик так же будет IN_PROGRESS
         subTaskOne.setStatus(Status.IN_PROGRESS);
-        try {
-            manager.updateTask(subTaskOne);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskOne);
 
-        }
         subTaskTwo.setStatus(Status.IN_PROGRESS);
-        try {
-            manager.updateTask(subTaskTwo);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskTwo);
 
-        }
         subTaskThree.setStatus(Status.IN_PROGRESS);
-        try {
-            manager.updateTask(subTaskThree);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskThree);
 
-        }
         assertEquals(Status.IN_PROGRESS, epicTask.getStatus());
-
     }
 
     @Test
     public void shouldBeInDoneStatus() {
         //Тестируем что при установке всех сабов в статус IN_PROGRESS, Эпик так же будет IN_PROGRESS
         subTaskOne.setStatus(Status.DONE);
-        try {
-            manager.updateTask(subTaskOne);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskOne);
 
-        }
         subTaskTwo.setStatus(Status.DONE);
-        try {
-            manager.updateTask(subTaskTwo);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskTwo);
 
-        }
         subTaskThree.setStatus(Status.DONE);
-        try {
-            manager.updateTask(subTaskThree);
-        } catch (IntersectionsException e) {
+        manager.updateTask(subTaskThree);
 
-        }
         assertEquals(Status.DONE, manager.getTaskById(2).getStatus());
     }
 
@@ -365,7 +274,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, history.get(0).getId());
         assertEquals(5, history.get(1).getId());
         assertEquals(2, history.size());
-
     }
 
     @Test
@@ -380,11 +288,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(4, history.get(0).getId());
         assertEquals(5, history.get(1).getId());
         assertEquals(2, history.size());
-
     }
 
     @Test
-    public void ShoudBeTwoTask() {
+    public void ShouldBeTwoTask() {
         //Тестируем удаление сабов при удалении Эпика
         manager.deleteTaskByID(epicTask.getId());
         assertEquals(2, manager.getTasks().size());

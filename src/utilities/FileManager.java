@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class FileManager {
 
-    public static boolean fileExist(String pathToFile) throws IOException {
+    public static boolean fileExist(String pathToFile) {
 
         File file = new File(pathToFile);
         if (!file.exists()) {
@@ -16,7 +16,11 @@ public class FileManager {
                     return false;
                 }
             }
-            return file.createNewFile();
+            try {
+                return file.createNewFile();
+            } catch (IOException e) {
+                return false;
+            }
         } else {
             return true;
         }
