@@ -1,5 +1,6 @@
 import constants.Status;
-import managers.InMemoryTaskManager;
+import constants.TypeOfManager;
+import managers.Managers;
 import managers.interfaces.TaskManager;
 import servers.HttpTaskServer;
 import task.EpicTask;
@@ -14,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         //Наиболее простой менеджер, нам только эндпоинты потестить
-        TaskManager manager = new InMemoryTaskManager();
+        TaskManager manager = Managers.getManager(TypeOfManager.HTTP, "http://localhost:8078");
         //Наполняем менеджер, что бы было что считывать
         //Один Симпл
         SimpleTask simpleTaskToAdd = new SimpleTask("NameSimple", "DescriptionSimple", Status.IN_PROGRESS, LocalDateTime.of(2022, 12, 20, 14, 40, 0), Duration.ofHours(10));
@@ -35,7 +36,5 @@ public class Main {
 
         HttpTaskServer server = new HttpTaskServer(manager);
         server.start();
-
-
     }
 }

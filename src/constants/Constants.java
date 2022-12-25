@@ -18,10 +18,14 @@ public class Constants {
     public static final String PATH_EPIC = "/tasks/epic";
     public static final String PATH_HISTORY = "/tasks/history";
     public static final String PATH_TASKS = "/tasks";
-    public static final String GOOD_PATTERN_FOR_ID = "^/tasks/(task|epic|subtask)/$";
+    public static final String GOOD_PATTERN_FOR_ID = "^/tasks/(task|epic|subtask)/?$";
     public static final String ID_PATTERN = "id=";
     public static final String HISTORY_PATTERN = "^/tasks/history/?";
     public static final String TASKS_PATTERN = "^/tasks/?";
+    public static final String NOT_FOUND = "Задача не найдена";
+    public static final String WRONG_TYPE = "Неверный тип задачи, ожидался запрос: ";
+    public static final String WRONG_REQUEST = "Сервер не сумел обработать запрос";
+    public static final String WRONG_BODY = "Сервер не сумел обработать тело запроса";
 
 
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import constants.Constants;
 import exceptions.IntersectionsException;
+import servers.KVServer;
 import servers.client.KVTaskClient;
 import task.EpicTask;
 import task.SimpleTask;
@@ -24,6 +25,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
     private static final Gson gson = MyGsonBuilder.create();
 
     public HttpTaskManager(URI path) throws InterruptedException, IOException {
+        new KVServer().start();
         this.client = new KVTaskClient(path.toString());
         readFile();
     }

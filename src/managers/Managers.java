@@ -3,7 +3,6 @@ package managers;
 import constants.TypeOfManager;
 import managers.interfaces.HistoryManager;
 import managers.interfaces.TaskManager;
-import servers.KVServer;
 import utilities.FileManager;
 
 import java.io.IOException;
@@ -11,30 +10,17 @@ import java.net.URI;
 
 public class Managers {
     public static TaskManager getManager(TypeOfManager typeOfManager, String path) {
-        switch (typeOfManager) {
-            case MEMORY:
-                return new InMemoryTaskManager();
-            case FILE:
-                if (path != null && FileManager.fileExist(path)) {
-                    return new FileBackedTasksManager(path);
-                }
-                break;
-            case HTTP:
-                try {
-                    if (path != null) return new HttpTaskManager(URI.create(path));
-                } catch (IOException | InterruptedException e) {
-                    e.fillInStackTrace();
-                }
-                break;
+        TaskManager manager = new InMemoryTaskManager();
+        if (typeOfManager == TypeOfManager.FILE && path != null && FileManager.fileExist(path)) {
+            manager = new FileBackedTasksManager(path);
+        } else if (typeOfManager == TypeOfManager.HTTP && path != null) {
+            try {
+                manager = new HttpTaskManager(URI.create(path));
+            } catch (IOException | InterruptedException e) {
+                e.fillInStackTrace();
+            }
         }
-        //Если не указали тип
-        try {
-            if (path != null) return new HttpTaskManager(URI.create(path));
-            return new HttpTaskManager(URI.create("http://localhost:" + KVServer.PORT));
-        } catch (IOException | InterruptedException e) {
-            e.fillInStackTrace();
-        }
-        return new InMemoryTaskManager();
+        return manager;
     }
 
     public static HistoryManager getDefaultHistory() {
